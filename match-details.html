@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Details - Cricket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .score-section {
+            padding: 24px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .team-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .team-score {
+            font-size: 16px;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        .match-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .live-badge {
+            background-color: #ea4335;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .full-scorecard-link {
+            color: #1a73e8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .player-stats {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stats-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #5f6368;
+            text-transform: uppercase;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 12px 0;
+            font-size: 14px;
+            color: #202124;
+        }
+
+        .view-scorecard {
+            padding: 16px 20px;
+            text-align: center;
+        }
+
+        .view-scorecard-btn {
+            color: #1a73e8;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .over-section {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 16px;
+        }
+
+        .over-balls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .ball {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #e8f0fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a73e8;
+        }
+
+        .ball.six {
+            background-color: #34a853;
+            color: white;
+        }
+
+        .ball.four {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .ball.wicket {
+            background-color: #ea4335;
+            color: white;
+        }
+
+        .ball.dot {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        .bowler-stats {
+            padding: 20px;
+        }
+
+        .bowler-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #5f6368;
+            text-transform: uppercase;
+        }
+
+        .bowler-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 12px 0;
+            font-size: 14px;
+            color: #202124;
+        }
+
+        .stat-cell {
+            text-align: center;
+        }
+
+        .stat-cell:first-child {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Match Details
+        </div>
+
+        <div class="score-section">
+            <div class="match-status">
+                <span class="live-badge">Live</span>
+                <a href="#" class="full-scorecard-link">Full Scorecard</a>
+            </div>
+
+            <div class="team">
+                <span class="team-name">Mumbai Strikers</span>
+                <span class="team-score">167/4(18.2)</span>
+            </div>
+            <div class="team">
+                <span class="team-name">Delhi Warriors</span>
+                <span class="team-score">142/6(20.0)</span>
+            </div>
+        </div>
+
+        <div class="player-stats">
+            <div class="stats-header">
+                <div class="stat-cell">Player</div>
+                <div class="stat-cell">Runs</div>
+                <div class="stat-cell">Balls</div>
+                <div class="stat-cell">6s</div>
+                <div class="stat-cell">4s</div>
+                <div class="stat-cell">S.R</div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-cell">Rohit Sharma*</div>
+                <div class="stat-cell">45</div>
+                <div class="stat-cell">32</div>
+                <div class="stat-cell">2</div>
+                <div class="stat-cell">4</div>
+                <div class="stat-cell">140.6</div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-cell">Virat Kohli</div>
+                <div class="stat-cell">28</div>
+                <div class="stat-cell">21</div>
+                <div class="stat-cell">1</div>
+                <div class="stat-cell">2</div>
+                <div class="stat-cell">133.3</div>
+            </div>
+        </div>
+
+        <div class="view-scorecard">
+            <a href="#" class="view-scorecard-btn">View Scorecard</a>
+        </div>
+
+        <div class="over-section">
+            <div class="section-title">This Over</div>
+            <div class="over-balls">
+                <div class="ball">1</div>
+                <div class="ball dot">0</div>
+                <div class="ball four">4</div>
+                <div class="ball">1</div>
+                <div class="ball">2</div>
+                <div class="ball six">6</div>
+            </div>
+        </div>
+
+        <div class="bowler-stats">
+            <div class="bowler-header">
+                <div class="stat-cell">Bowler</div>
+                <div class="stat-cell">Overs</div>
+                <div class="stat-cell">Os</div>
+                <div class="stat-cell">R</div>
+                <div class="stat-cell">W</div>
+                <div class="stat-cell">E</div>
+            </div>
+            <div class="bowler-row">
+                <div class="stat-cell">Jasprit Bumrah*</div>
+                <div class="stat-cell">3.2</div>
+                <div class="stat-cell">20</div>
+                <div class="stat-cell">28</div>
+                <div class="stat-cell">2</div>
+                <div class="stat-cell">8.4</div>
+            </div>
+            <div class="bowler-row">
+                <div class="stat-cell">Ravindra Jadeja</div>
+                <div class="stat-cell">4.0</div>
+                <div class="stat-cell">24</div>
+                <div class="stat-cell">32</div>
+                <div class="stat-cell">1</div>
+                <div class="stat-cell">8.0</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

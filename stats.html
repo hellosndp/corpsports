@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats - Corporate Sports</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 12px;
+            padding: 20px 20px 16px 20px;
+            overflow-x: auto;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: transparent;
+            color: #5f6368;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            background-color: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
+        }
+
+        .stats-table {
+            padding: 0;
+        }
+
+        /* Cricket specific table */
+        .cricket-table .table-header {
+            display: grid;
+            grid-template-columns: 50px 2fr repeat(6, 1fr);
+            gap: 8px;
+            padding: 16px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #5f6368;
+            text-transform: uppercase;
+        }
+
+        .cricket-table .table-row {
+            display: grid;
+            grid-template-columns: 50px 2fr repeat(6, 1fr);
+            gap: 8px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Other sports table */
+        .general-table .table-header {
+            display: grid;
+            grid-template-columns: 50px 2fr repeat(5, 1fr);
+            gap: 10px;
+            padding: 16px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #5f6368;
+            text-transform: uppercase;
+        }
+
+        .general-table .table-row {
+            display: grid;
+            grid-template-columns: 50px 2fr repeat(5, 1fr);
+            gap: 10px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .table-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .position {
+            font-size: 16px;
+            font-weight: 700;
+            color: #202124;
+            text-align: center;
+        }
+
+        .position.top3 {
+            color: #1a73e8;
+        }
+
+        .player-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .stat-cell {
+            text-align: center;
+            font-size: 13px;
+            color: #5f6368;
+        }
+
+        .header-cell {
+            text-align: center;
+        }
+
+        .header-cell:first-child {
+            text-align: center;
+        }
+
+        .header-cell:nth-child(2) {
+            text-align: left;
+        }
+
+        .stat-cell:first-child {
+            text-align: center;
+        }
+
+        .stat-cell:nth-child(2) {
+            text-align: left;
+        }
+
+        .sport-section {
+            display: none;
+        }
+
+        .sport-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Stats
+        </div>
+
+        <div class="filter-tabs">
+            <div class="tab active" data-sport="cricket">#Cricket</div>
+            <div class="tab" data-sport="badminton">#Badminton</div>
+            <div class="tab" data-sport="tt">#TT</div>
+            <div class="tab" data-sport="football">#Football</div>
+            <div class="tab" data-sport="chess">#Chess</div>
+        </div>
+
+        <!-- Cricket Stats -->
+        <div class="sport-section active cricket-table" id="cricket">
+            <div class="stats-table">
+                <div class="table-header">
+                    <div class="header-cell">Pos</div>
+                    <div class="header-cell">Player</div>
+                    <div class="header-cell">Runs</div>
+                    <div class="header-cell">Balls</div>
+                    <div class="header-cell">S.R</div>
+                    <div class="header-cell">4s</div>
+                    <div class="header-cell">6s</div>
+                    <div class="header-cell">Avg</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">1</div>
+                    <div class="player-name">Rohit Sharma</div>
+                    <div class="stat-cell">542</div>
+                    <div class="stat-cell">389</div>
+                    <div class="stat-cell">139.3</div>
+                    <div class="stat-cell">48</div>
+                    <div class="stat-cell">22</div>
+                    <div class="stat-cell">45.2</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">2</div>
+                    <div class="player-name">Virat Kohli</div>
+                    <div class="stat-cell">518</div>
+                    <div class="stat-cell">402</div>
+                    <div class="stat-cell">128.9</div>
+                    <div class="stat-cell">52</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">43.2</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">3</div>
+                    <div class="player-name">KL Rahul</div>
+                    <div class="stat-cell">487</div>
+                    <div class="stat-cell">368</div>
+                    <div class="stat-cell">132.3</div>
+                    <div class="stat-cell">44</div>
+                    <div class="stat-cell">16</div>
+                    <div class="stat-cell">40.6</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">4</div>
+                    <div class="player-name">Shubman Gill</div>
+                    <div class="stat-cell">456</div>
+                    <div class="stat-cell">342</div>
+                    <div class="stat-cell">133.3</div>
+                    <div class="stat-cell">46</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">38.0</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">5</div>
+                    <div class="player-name">Rishabh Pant</div>
+                    <div class="stat-cell">442</div>
+                    <div class="stat-cell">298</div>
+                    <div class="stat-cell">148.3</div>
+                    <div class="stat-cell">38</div>
+                    <div class="stat-cell">24</div>
+                    <div class="stat-cell">36.8</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">6</div>
+                    <div class="player-name">Hardik Pandya</div>
+                    <div class="stat-cell">398</div>
+                    <div class="stat-cell">276</div>
+                    <div class="stat-cell">144.2</div>
+                    <div class="stat-cell">32</div>
+                    <div class="stat-cell">21</div>
+                    <div class="stat-cell">33.2</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">7</div>
+                    <div class="player-name">Suryakumar Yadav</div>
+                    <div class="stat-cell">376</div>
+                    <div class="stat-cell">254</div>
+                    <div class="stat-cell">148.0</div>
+                    <div class="stat-cell">34</div>
+                    <div class="stat-cell">19</div>
+                    <div class="stat-cell">31.3</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">8</div>
+                    <div class="player-name">Ishan Kishan</div>
+                    <div class="stat-cell">354</div>
+                    <div class="stat-cell">268</div>
+                    <div class="stat-cell">132.1</div>
+                    <div class="stat-cell">36</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">29.5</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">9</div>
+                    <div class="player-name">Shreyas Iyer</div>
+                    <div class="stat-cell">342</div>
+                    <div class="stat-cell">278</div>
+                    <div class="stat-cell">123.0</div>
+                    <div class="stat-cell">38</div>
+                    <div class="stat-cell">10</div>
+                    <div class="stat-cell">28.5</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">10</div>
+                    <div class="player-name">Ravindra Jadeja</div>
+                    <div class="stat-cell">318</div>
+                    <div class="stat-cell">234</div>
+                    <div class="stat-cell">135.9</div>
+                    <div class="stat-cell">28</div>
+                    <div class="stat-cell">12</div>
+                    <div class="stat-cell">26.5</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badminton Stats -->
+        <div class="sport-section general-table" id="badminton">
+            <div class="stats-table">
+                <div class="table-header">
+                    <div class="header-cell">Pos</div>
+                    <div class="header-cell">Player</div>
+                    <div class="header-cell">Played</div>
+                    <div class="header-cell">Won</div>
+                    <div class="header-cell">Lost</div>
+                    <div class="header-cell">Tie</div>
+                    <div class="header-cell">Points</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">1</div>
+                    <div class="player-name">Priya Sharma</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">12</div>
+                    <div class="stat-cell">3</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">24</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">2</div>
+                    <div class="player-name">Rahul Verma</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">11</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">22</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">3</div>
+                    <div class="player-name">Ananya Singh</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">10</div>
+                    <div class="stat-cell">5</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">20</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">4</div>
+                    <div class="player-name">Arjun Mehta</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">9</div>
+                    <div class="stat-cell">6</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">18</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">5</div>
+                    <div class="player-name">Sneha Patel</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">8</div>
+                    <div class="stat-cell">7</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">16</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">6</div>
+                    <div class="player-name">Karthik Kumar</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">7</div>
+                    <div class="stat-cell">8</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">14</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">7</div>
+                    <div class="player-name">Divya Reddy</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">6</div>
+                    <div class="stat-cell">9</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">12</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">8</div>
+                    <div class="player-name">Amit Joshi</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">5</div>
+                    <div class="stat-cell">10</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">10</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">9</div>
+                    <div class="player-name">Neha Gupta</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">11</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">8</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">10</div>
+                    <div class="player-name">Vikram Desai</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">3</div>
+                    <div class="stat-cell">12</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">6</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TT Stats -->
+        <div class="sport-section general-table" id="tt">
+            <div class="stats-table">
+                <div class="table-header">
+                    <div class="header-cell">Pos</div>
+                    <div class="header-cell">Player</div>
+                    <div class="header-cell">Played</div>
+                    <div class="header-cell">Won</div>
+                    <div class="header-cell">Lost</div>
+                    <div class="header-cell">Tie</div>
+                    <div class="header-cell">Points</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">1</div>
+                    <div class="player-name">Sanjay Malhotra</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">3</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">30</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">2</div>
+                    <div class="player-name">Kavya Nair</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">28</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">3</div>
+                    <div class="player-name">Rohan Das</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">13</div>
+                    <div class="stat-cell">5</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">26</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">4</div>
+                    <div class="player-name">Meera Iyer</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">12</div>
+                    <div class="stat-cell">6</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">24</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">5</div>
+                    <div class="player-name">Aditya Shah</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">10</div>
+                    <div class="stat-cell">8</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">20</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">6</div>
+                    <div class="player-name">Pooja Pillai</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">9</div>
+                    <div class="stat-cell">9</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">18</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">7</div>
+                    <div class="player-name">Nikhil Rao</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">7</div>
+                    <div class="stat-cell">11</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">14</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">8</div>
+                    <div class="player-name">Shreya Kapoor</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">6</div>
+                    <div class="stat-cell">12</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">12</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">9</div>
+                    <div class="player-name">Akash Bose</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">8</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">10</div>
+                    <div class="player-name">Tanvi Menon</div>
+                    <div class="stat-cell">18</div>
+                    <div class="stat-cell">3</div>
+                    <div class="stat-cell">15</div>
+                    <div class="stat-cell">0</div>
+                    <div class="stat-cell">6</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Football Stats -->
+        <div class="sport-section general-table" id="football">
+            <div class="stats-table">
+                <div class="table-header">
+                    <div class="header-cell">Pos</div>
+                    <div class="header-cell">Player</div>
+                    <div class="header-cell">Played</div>
+                    <div class="header-cell">Won</div>
+                    <div class="header-cell">Lost</div>
+                    <div class="header-cell">Tie</div>
+                    <div class="header-cell">Points</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">1</div>
+                    <div class="player-name">Suresh Kumar</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">10</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">32</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">2</div>
+                    <div class="player-name">Ravi Krishnan</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">9</div>
+                    <div class="stat-cell">3</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">29</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">3</div>
+                    <div class="player-name">Deepak Shetty</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">8</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">26</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">4</div>
+                    <div class="player-name">Manish Agarwal</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">8</div>
+                    <div class="stat-cell">5</div>
+                    <div class="stat-cell">1</div>
+                    <div class="stat-cell">25</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">5</div>
+                    <div class="player-name">Prakash Reddy</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">7</div>
+                    <div class="stat-cell">5</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">23</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">6</div>
+                    <div class="player-name">Vijay Menon</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">6</div>
+                    <div class="stat-cell">6</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">20</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">7</div>
+                    <div class="player-name">Ajay Singh</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">5</div>
+                    <div class="stat-cell">7</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">17</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">8</div>
+                    <div class="player-name">Naveen Pillai</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">8</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">14</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">9</div>
+                    <div class="player-name">Kiran Das</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">3</div>
+                    <div class="stat-cell">9</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">11</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">10</div>
+                    <div class="player-name">Santosh Nair</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">10</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">8</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chess Stats -->
+        <div class="sport-section general-table" id="chess">
+            <div class="stats-table">
+                <div class="table-header">
+                    <div class="header-cell">Pos</div>
+                    <div class="header-cell">Player</div>
+                    <div class="header-cell">Played</div>
+                    <div class="header-cell">Won</div>
+                    <div class="header-cell">Lost</div>
+                    <div class="header-cell">Tie</div>
+                    <div class="header-cell">Points</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">1</div>
+                    <div class="player-name">Vishal Anand</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">14</div>
+                    <div class="stat-cell">2</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">32</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">2</div>
+                    <div class="player-name">Priyanka Shah</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">13</div>
+                    <div class="stat-cell">3</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">30</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position top3">3</div>
+                    <div class="player-name">Arun Kumar</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">12</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">28</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">4</div>
+                    <div class="player-name">Lakshmi Iyer</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">11</div>
+                    <div class="stat-cell">5</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">26</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">5</div>
+                    <div class="player-name">Rajesh Gupta</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">10</div>
+                    <div class="stat-cell">6</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">24</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">6</div>
+                    <div class="player-name">Swati Menon</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">8</div>
+                    <div class="stat-cell">8</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">20</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">7</div>
+                    <div class="player-name">Harish Rao</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">7</div>
+                    <div class="stat-cell">9</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">18</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">8</div>
+                    <div class="player-name">Anjali Patel</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">6</div>
+                    <div class="stat-cell">10</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">16</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">9</div>
+                    <div class="player-name">Siddharth Jain</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">5</div>
+                    <div class="stat-cell">11</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">14</div>
+                </div>
+
+                <div class="table-row">
+                    <div class="position">10</div>
+                    <div class="player-name">Madhavi Reddy</div>
+                    <div class="stat-cell">20</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">12</div>
+                    <div class="stat-cell">4</div>
+                    <div class="stat-cell">12</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        const tabs = document.querySelectorAll('.tab');
+        const sections = document.querySelectorAll('.sport-section');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and sections
+                tabs.forEach(t => t.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+
+                // Add active class to clicked tab
+                tab.classList.add('active');
+
+                // Show corresponding section
+                const sport = tab.getAttribute('data-sport');
+                document.getElementById(sport).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
