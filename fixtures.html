@@ -555,20 +555,14 @@
 
     <script>
         function navigate(page) {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            console.log('Navigating to:', page);
+            const pageUrls = {
+                'home': 'home.html',
+                'fixtures': 'fixtures.html',
+                'leaderboard': 'leaderboard.html',
+                'stats': 'stats.html'
+            };
+            window.location.href = pageUrls[page];
         }
-
-        function openMatchDetails() {
-            // In a real app, this would navigate to the match details page
-            alert('Opening Match Details...');
-        }
-
-        // Smooth scroll behavior
-        document.querySelector('.fixtures-content').style.scrollBehavior = 'smooth';
     </script>
 </body>
 </html>

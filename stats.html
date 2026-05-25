@@ -867,11 +867,13 @@
 
     <script>
         function navigate(page) {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            console.log('Navigating to:', page);
+            const pageUrls = {
+                'home': 'home.html',
+                'fixtures': 'fixtures.html',
+                'leaderboard': 'leaderboard.html',
+                'stats': 'stats.html'
+            };
+            window.location.href = pageUrls[page];
         }
 
         // Tab switching functionality

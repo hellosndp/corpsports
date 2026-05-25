@@ -491,17 +491,13 @@
         }
 
         function navigate(page) {
-            // Remove active class from all nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Add active class to clicked item
-            event.currentTarget.classList.add('active');
-            
-            // In a real app, this would navigate to the respective page
-            console.log('Navigating to:', page);
-            alert('Navigating to ' + page.charAt(0).toUpperCase() + page.slice(1));
+            const pageUrls = {
+                'home': 'home.html',
+                'fixtures': 'fixtures.html',
+                'leaderboard': 'leaderboard.html',
+                'stats': 'stats.html'
+            };
+            window.location.href = pageUrls[page];
         }
     </script>
 </body>
