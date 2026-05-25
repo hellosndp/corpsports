@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Corporate Sports</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            padding-bottom: 120px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 12px;
+        }
+
+        .welcome-subtitle {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 32px;
+        }
+
+        .create-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
+        }
+
+        .create-btn:hover {
+            background-color: #1557b0;
+            box-shadow: 0 4px 8px rgba(26, 115, 232, 0.4);
+        }
+
+        .create-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Form Section */
+        .form-section {
+            display: none;
+            padding: 20px;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 0 20px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            color: #5f6368;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 auto 8px;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background-color: #34a853;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 11px;
+            color: #5f6368;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        .step-line {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background-color: #e0e0e0;
+            z-index: -1;
+        }
+
+        .step:last-child .step-line {
+            display: none;
+        }
+
+        .step.completed .step-line {
+            background-color: #34a853;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 8px;
+        }
+
+        .form-select,
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #202124;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+
+        .form-select:focus,
+        .form-input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .team-selection {
+            display: grid;
+            gap: 12px;
+        }
+
+        .team-option {
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team-option:hover {
+            border-color: #1a73e8;
+            background-color: #f8f9fa;
+        }
+
+        .team-option.selected {
+            border-color: #1a73e8;
+            background-color: #e8f0fe;
+        }
+
+        .team-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #5f6368;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .team-option.selected .team-checkbox {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+
+        .team-checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .team-option.selected .team-checkbox::after {
+            display: block;
+        }
+
+        .team-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .counter-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .counter-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background-color: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .counter-btn:hover {
+            background-color: #1557b0;
+        }
+
+        .counter-btn:active {
+            transform: scale(0.95);
+        }
+
+        .counter-value {
+            flex: 1;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        .points-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .points-input input {
+            width: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .btn-secondary,
+        .btn-primary {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary {
+            background-color: #f1f3f4;
+            color: #5f6368;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e8eaed;
+        }
+
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+
+        .btn-primary:disabled {
+            background-color: #e0e0e0;
+            color: #9e9e9e;
+            cursor: not-allowed;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #34a853;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-icon::after {
+            content: '✓';
+            color: white;
+            font-size: 48px;
+            font-weight: 600;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 12px;
+        }
+
+        .success-subtitle {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 32px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            border-radius: 24px;
+            padding: 12px 24px;
+            display: flex;
+            gap: 32px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-width: 400px;
+            width: calc(100% - 40px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            color: #5f6368;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active .nav-icon {
+            color: #1a73e8;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: #5f6368;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active .nav-label {
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        .nav-item:hover .nav-icon,
+        .nav-item:hover .nav-label {
+            color: #1a73e8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Admin Panel
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="content welcome-section" id="welcomeSection">
+            <div class="welcome-title">Create New Game</div>
+            <div class="welcome-subtitle">Schedule matches and manage your tournament</div>
+            <button class="create-btn" onclick="startCreation()">Create Game</button>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-section" id="formSection">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" id="stepIndicator1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Game</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step" id="stepIndicator2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Teams</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step" id="stepIndicator3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Schedule</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step" id="stepIndicator4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Details</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Select Game -->
+            <div class="form-step active" id="step1">
+                <div class="form-group">
+                    <label class="form-label">Select Game</label>
+                    <select class="form-select" id="gameSelect">
+                        <option value="">Choose a game...</option>
+                        <option value="cricket">Cricket</option>
+                        <option value="badminton">Badminton</option>
+                        <option value="tt">Table Tennis</option>
+                        <option value="football">Football</option>
+                        <option value="chess">Chess</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-secondary" onclick="cancelCreation()">Cancel</button>
+                    <button class="btn-primary" id="nextBtn1" onclick="nextStep(1)" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Select Teams -->
+            <div class="form-step" id="step2">
+                <div class="form-group">
+                    <label class="form-label">Select Teams (Choose 2)</label>
+                    <div class="team-selection" id="teamSelection">
+                        <div class="team-option" onclick="toggleTeam(this, 'Mumbai Strikers')">
+                            <div class="team-checkbox"></div>
+                            <div class="team-name">Mumbai Strikers</div>
+                        </div>
+                        <div class="team-option" onclick="toggleTeam(this, 'Delhi Warriors')">
+                            <div class="team-checkbox"></div>
+                            <div class="team-name">Delhi Warriors</div>
+                        </div>
+                        <div class="team-option" onclick="toggleTeam(this, 'Bangalore Tigers')">
+                            <div class="team-checkbox"></div>
+                            <div class="team-name">Bangalore Tigers</div>
+                        </div>
+                        <div class="team-option" onclick="toggleTeam(this, 'Chennai Challengers')">
+                            <div class="team-checkbox"></div>
+                            <div class="team-name">Chennai Challengers</div>
+                        </div>
+                        <div class="team-option" onclick="toggleTeam(this, 'Kolkata Knights')">
+                            <div class="team-checkbox"></div>
+                            <div class="team-name">Kolkata Knights</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-secondary" onclick="prevStep(2)">Back</button>
+                    <button class="btn-primary" id="nextBtn2" onclick="nextStep(2)" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Schedule Time -->
+            <div class="form-step" id="step3">
+                <div class="form-group">
+                    <label class="form-label">Schedule Date</label>
+                    <input type="date" class="form-input" id="scheduleDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Schedule Time</label>
+                    <input type="time" class="form-input" id="scheduleTime">
+                </div>
+                <div class="form-actions">
+                    <button class="btn-secondary" onclick="prevStep(3)">Back</button>
+                    <button class="btn-primary" id="nextBtn3" onclick="nextStep(3)" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Set Count & Points -->
+            <div class="form-step" id="step4">
+                <div class="form-group">
+                    <label class="form-label">Number of Sets</label>
+                    <div class="counter-group">
+                        <button class="counter-btn" onclick="decrementSets()">-</button>
+                        <div class="counter-value" id="setCount">1</div>
+                        <button class="counter-btn" onclick="incrementSets()">+</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Points per Set</label>
+                    <div class="points-input">
+                        <input type="number" class="form-input" id="pointsPerSet" value="21" min="1">
+                        <span style="color: #5f6368; font-size: 14px;">points</span>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-secondary" onclick="prevStep(4)">Back</button>
+                    <button class="btn-primary" onclick="createGame()">Create Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="successMessage">
+            <div class="success-icon"></div>
+            <div class="success-title">Game Created!</div>
+            <div class="success-subtitle">Your game has been scheduled successfully</div>
+            <button class="create-btn" onclick="resetForm()">Create Another Game</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="navigate('home')">
+            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span class="nav-label">Home</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('fixtures')">
+            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+            </svg>
+            <span class="nav-label">Fixtures</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('leaderboard')">
+            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/>
+            </svg>
+            <span class="nav-label">Leaderboard</span>
+        </div>
+
+        <div class="nav-item" onclick="navigate('stats')">
+            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <span class="nav-label">Stats</span>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let selectedTeams = [];
+        let setCount = 1;
+
+        // Navigation function
+        function navigate(page) {
+            const pageUrls = {
+                'home': './home.html',
+                'fixtures': './fixtures.html',
+                'leaderboard': './leaderboard.html',
+                'stats': './stats.html'
+            };
+            
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            window.location.href = pageUrls[page];
+        }
+
+        // Start creation flow
+        function startCreation() {
+            document.getElementById('welcomeSection').style.display = 'none';
+            document.getElementById('formSection').classList.add('active');
+        }
+
+        // Cancel creation
+        function cancelCreation() {
+            resetForm();
+        }
+
+        // Game selection
+        document.getElementById('gameSelect').addEventListener('change', function() {
+            const nextBtn = document.getElementById('nextBtn1');
+            nextBtn.disabled = this.value === '';
+        });
+
+        // Team selection
+        function toggleTeam(element, teamName) {
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                selectedTeams = selectedTeams.filter(t => t !== teamName);
+            } else {
+                if (selectedTeams.length < 2) {
+                    element.classList.add('selected');
+                    selectedTeams.push(teamName);
+                }
+            }
+            
+            const nextBtn = document.getElementById('nextBtn2');
+            nextBtn.disabled = selectedTeams.length !== 2;
+        }
+
+        // Schedule validation
+        document.getElementById('scheduleDate').addEventListener('change', validateSchedule);
+        document.getElementById('scheduleTime').addEventListener('change', validateSchedule);
+
+        function validateSchedule() {
+            const date = document.getElementById('scheduleDate').value;
+            const time = document.getElementById('scheduleTime').value;
+            const nextBtn = document.getElementById('nextBtn3');
+            nextBtn.disabled = !(date && time);
+        }
+
+        // Set counter
+        function incrementSets() {
+            if (setCount < 5) {
+                setCount++;
+                document.getElementById('setCount').textContent = setCount;
+            }
+        }
+
+        function decrementSets() {
+            if (setCount > 1) {
+                setCount--;
+                document.getElementById('setCount').textContent = setCount;
+            }
+        }
+
+        // Navigation between steps
+        function nextStep(step) {
+            // Hide current step
+            document.getElementById('step' + step).classList.remove('active');
+            
+            // Update step indicator
+            document.getElementById('stepIndicator' + step).classList.remove('active');
+            document.getElementById('stepIndicator' + step).classList.add('completed');
+            
+            // Show next step
+            const nextStepNum = step + 1;
+            document.getElementById('step' + nextStepNum).classList.add('active');
+            document.getElementById('stepIndicator' + nextStepNum).classList.add('active');
+            
+            currentStep = nextStepNum;
+        }
+
+        function prevStep(step) {
+            // Hide current step
+            document.getElementById('step' + step).classList.remove('active');
+            document.getElementById('stepIndicator' + step).classList.remove('active');
+            
+            // Show previous step
+            const prevStepNum = step - 1;
+            document.getElementById('step' + prevStepNum).classList.add('active');
+            
+            // Update step indicator
+            document.getElementById('stepIndicator' + prevStepNum).classList.remove('completed');
+            document.getElementById('stepIndicator' + prevStepNum).classList.add('active');
+            
+            currentStep = prevStepNum;
+        }
+
+        // Create game
+        function createGame() {
+            const game = document.getElementById('gameSelect').value;
+            const date = document.getElementById('scheduleDate').value;
+            const time = document.getElementById('scheduleTime').value;
+            const points = document.getElementById('pointsPerSet').value;
+
+            console.log('Game Created:', {
+                game,
+                teams: selectedTeams,
+                date,
+                time,
+                sets: setCount,
+                pointsPerSet: points
+            });
+
+            // Hide form and show success message
+            document.getElementById('formSection').classList.remove('active');
+            document.getElementById('successMessage').classList.add('active');
+        }
+
+        // Reset form
+        function resetForm() {
+            // Reset all values
+            currentStep = 1;
+            selectedTeams = [];
+            setCount = 1;
+            
+            // Reset form fields
+            document.getElementById('gameSelect').value = '';
+            document.getElementById('scheduleDate').value = '';
+            document.getElementById('scheduleTime').value = '';
+            document.getElementById('pointsPerSet').value = '21';
+            document.getElementById('setCount').textContent = '1';
+            
+            // Reset team selections
+            document.querySelectorAll('.team-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Reset step indicators
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById('stepIndicator' + i).classList.remove('active', 'completed');
+                document.getElementById('step' + i).classList.remove('active');
+            }
+            document.getElementById('stepIndicator1').classList.add('active');
+            document.getElementById('step1').classList.add('active');
+            
+            // Reset buttons
+            document.getElementById('nextBtn1').disabled = true;
+            document.getElementById('nextBtn2').disabled = true;
+            document.getElementById('nextBtn3').disabled = true;
+            
+            // Show welcome section
+            document.getElementById('welcomeSection').style.display = 'block';
+            document.getElementById('formSection').classList.remove('active');
+            document.getElementById('successMessage').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
