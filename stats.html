@@ -868,11 +868,18 @@
     <script>
         function navigate(page) {
             const pageUrls = {
-                'home': 'home.html',
-                'fixtures': 'fixtures.html',
-                'leaderboard': 'leaderboard.html',
-                'stats': 'stats.html'
+                'home': './home.html',
+                'fixtures': './fixtures.html',
+                'leaderboard': './leaderboard.html',
+                'stats': './stats.html'
             };
+            
+            // Prevent the event from bubbling
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
             window.location.href = pageUrls[page];
         }
 

@@ -556,13 +556,28 @@
     <script>
         function navigate(page) {
             const pageUrls = {
-                'home': 'home.html',
-                'fixtures': 'fixtures.html',
-                'leaderboard': 'leaderboard.html',
-                'stats': 'stats.html'
+                'home': './home.html',
+                'fixtures': './fixtures.html',
+                'leaderboard': './leaderboard.html',
+                'stats': './stats.html'
             };
+            
+            // Prevent the event from bubbling
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
             window.location.href = pageUrls[page];
         }
+
+        function openMatchDetails() {
+            // In a real app, this would navigate to the match details page
+            alert('Opening Match Details...');
+        }
+
+        // Smooth scroll behavior
+        document.querySelector('.fixtures-content').style.scrollBehavior = 'smooth';
     </script>
 </body>
 </html>
