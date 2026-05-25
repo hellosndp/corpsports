@@ -464,6 +464,23 @@
     </div>
 
     <script>
+        function navigate(page) {
+            const pageUrls = {
+                'home': './home.html',
+                'fixtures': './fixtures.html',
+                'leaderboard': './leaderboard.html',
+                'stats': './stats.html'
+            };
+            
+            // Prevent the event from bubbling
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            window.location.href = pageUrls[page];
+        }
+
         let currentSlide = 0;
         const totalSlides = 3;
         const track = document.getElementById('carouselTrack');
@@ -488,16 +505,6 @@
 
         function openMatchDetails() {
             alert('Opening Match Details...');
-        }
-
-        function navigate(page) {
-            const pageUrls = {
-                'home': 'home.html',
-                'fixtures': 'fixtures.html',
-                'leaderboard': 'leaderboard.html',
-                'stats': 'stats.html'
-            };
-            window.location.href = pageUrls[page];
         }
     </script>
 </body>
