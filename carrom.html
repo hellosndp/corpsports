@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrom Scorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .app {
+            max-width: 100%;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 16px 20px 20px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .spacer { width: 32px; }
+
+        .match-badge {
+            display: inline-block;
+            background-color: rgba(255,255,255,0.2);
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            margin: 0 auto 6px;
+            display: block;
+            width: fit-content;
+            margin: 0 auto 6px;
+        }
+
+        .board-label {
+            text-align: center;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .icon-trophy { background-color: #e8f5e9; }
+        .icon-red { background-color: #fce8e6; }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #202124;
+            margin-bottom: 2px;
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: #9e9e9e;
+        }
+
+        /* Team options */
+        .team-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .team-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .team-option:active {
+            transform: scale(0.97);
+        }
+
+        .radio-dot {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e0;
+            transition: all 0.2s ease;
+        }
+
+        /* Winner selection */
+        .team-option.selected-a {
+            border-color: #1a73e8;
+            background-color: #e8f0fe;
+        }
+
+        .team-option.selected-a .radio-dot {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+
+        .team-option.selected-b {
+            border-color: #ea4335;
+            background-color: #fce8e6;
+        }
+
+        .team-option.selected-b .radio-dot {
+            background-color: #ea4335;
+            border-color: #ea4335;
+        }
+
+        .option-team-label {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .option-team-a .option-team-label { color: #1a73e8; }
+        .option-team-b .option-team-label { color: #ea4335; }
+
+        .option-team-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        /* End match button */
+        .end-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            margin-top: 4px;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.35);
+        }
+
+        .end-btn:hover { background-color: #1557b0; }
+        .end-btn:active { transform: scale(0.98); }
+        .end-btn:disabled {
+            background-color: #b0c4e8;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Success overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .overlay.visible { display: flex; animation: fadeIn 0.2s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .popup {
+            background: white;
+            border-radius: 24px 24px 0 0;
+            padding: 36px 24px 44px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .popup-trophy {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            box-shadow: 0 4px 16px rgba(251,191,36,0.4);
+        }
+
+        .popup-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #202124;
+            margin-bottom: 8px;
+        }
+
+        .popup-sub {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 28px;
+        }
+
+        .popup-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .popup-btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .popup-btn-secondary {
+            background: white;
+            color: #5f6368;
+            border: 1.5px solid #e0e0e0 !important;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <button class="back-btn">←</button>
+                <span class="header-title">Carrom</span>
+                <div class="spacer"></div>
+            </div>
+            <div class="match-badge">Match #CR-021</div>
+            <div class="board-label">Board 1</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+
+            <!-- Winner card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon icon-trophy">🏆</div>
+                    <div>
+                        <div class="card-title">Winner</div>
+                        <div class="card-subtitle">Select winning team</div>
+                    </div>
+                </div>
+                <div class="team-grid">
+                    <div class="team-option option-team-a" id="winnerA" onclick="selectWinner('A')">
+                        <div class="radio-dot" id="winnerDotA"></div>
+                        <div class="option-team-label">Team A</div>
+                        <div class="option-team-name">Rohit Sharma & Co.</div>
+                    </div>
+                    <div class="team-option option-team-b" id="winnerB" onclick="selectWinner('B')">
+                        <div class="radio-dot" id="winnerDotB"></div>
+                        <div class="option-team-label">Team B</div>
+                        <div class="option-team-name">Amit Verma & Co.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Red coin card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon icon-red">🔴</div>
+                    <div>
+                        <div class="card-title">Who got Red?</div>
+                        <div class="card-subtitle">Select team who got the Red coin</div>
+                    </div>
+                </div>
+                <div class="team-grid">
+                    <div class="team-option option-team-a" id="redA" onclick="selectRed('A')">
+                        <div class="radio-dot" id="redDotA"></div>
+                        <div class="option-team-label">Team A</div>
+                        <div class="option-team-name">Rohit Sharma & Co.</div>
+                    </div>
+                    <div class="team-option option-team-b" id="redB" onclick="selectRed('B')">
+                        <div class="radio-dot" id="redDotB"></div>
+                        <div class="option-team-label">Team B</div>
+                        <div class="option-team-name">Amit Verma & Co.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End Match -->
+            <button class="end-btn" id="endBtn" onclick="endMatch()" disabled>
+                🏁 End Match
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="overlay" id="overlay">
+        <div class="popup">
+            <div class="popup-trophy">🏆</div>
+            <div class="popup-title" id="popupTitle">Match Complete!</div>
+            <div class="popup-sub" id="popupSub">Rohit Sharma & Co. wins the match</div>
+            <button class="popup-btn popup-btn-primary" onclick="closePopup()">Done</button>
+            <button class="popup-btn popup-btn-secondary" onclick="closePopup()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let winner = null;
+        let redCoin = null;
+
+        const TEAMS = {
+            A: 'Rohit Sharma & Co.',
+            B: 'Amit Verma & Co.'
+        };
+
+        function selectWinner(team) {
+            winner = team;
+
+            document.getElementById('winnerA').className = 'team-option option-team-a';
+            document.getElementById('winnerB').className = 'team-option option-team-b';
+
+            if (team === 'A') {
+                document.getElementById('winnerA').classList.add('selected-a');
+            } else {
+                document.getElementById('winnerB').classList.add('selected-b');
+            }
+
+            checkReady();
+        }
+
+        function selectRed(team) {
+            redCoin = team;
+
+            document.getElementById('redA').className = 'team-option option-team-a';
+            document.getElementById('redB').className = 'team-option option-team-b';
+
+            if (team === 'A') {
+                document.getElementById('redA').classList.add('selected-a');
+            } else {
+                document.getElementById('redB').classList.add('selected-b');
+            }
+
+            checkReady();
+        }
+
+        function checkReady() {
+            document.getElementById('endBtn').disabled = !(winner && redCoin);
+        }
+
+        function endMatch() {
+            const winnerName = TEAMS[winner];
+            const redName = TEAMS[redCoin];
+            document.getElementById('popupTitle').textContent = `${winnerName} Wins!`;
+            document.getElementById('popupSub').textContent = `Red coin pocketed by ${redName}`;
+            document.getElementById('overlay').classList.add('visible');
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').classList.remove('visible');
+        }
+    </script>
+</body>
+</html>
