@@ -5,26 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fixtures - Corporate Sports</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f5f5f5;
-            padding: 20px;
             padding-bottom: 120px;
         }
 
         .container {
             max-width: 480px;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            background: white;
+            min-height: 100vh;
         }
 
         .header {
@@ -33,180 +26,193 @@
             padding: 16px 20px;
             font-size: 18px;
             font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .header-refresh { font-size: 12px; opacity: 0.8; font-weight: 400; }
 
         .filter-tabs {
             display: flex;
-            gap: 12px;
-            padding: 20px 20px 16px 20px;
+            gap: 10px;
+            padding: 14px 16px;
             overflow-x: auto;
             border-bottom: 1px solid #e0e0e0;
         }
 
-        .filter-tabs::-webkit-scrollbar {
-            display: none;
-        }
+        .filter-tabs::-webkit-scrollbar { display: none; }
 
         .tab {
-            padding: 8px 16px;
+            padding: 7px 14px;
             border-radius: 20px;
-            background-color: transparent;
+            background: transparent;
             color: #5f6368;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
             cursor: pointer;
             border: 1px solid #e0e0e0;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
 
-        .tab.active {
-            background-color: #1a73e8;
-            color: white;
-            border-color: #1a73e8;
-        }
+        .tab.active { background: #1a73e8; color: white; border-color: #1a73e8; }
 
         .fixtures-content {
             padding: 0;
-            max-height: calc(100vh - 200px);
-            overflow-y: auto;
         }
 
-        .date-section {
-            margin-bottom: 8px;
-        }
+        .date-section { margin-bottom: 4px; }
 
         .date-header {
-            padding: 16px 20px 12px 20px;
-            font-size: 14px;
-            font-weight: 600;
+            padding: 14px 20px 10px;
+            font-size: 13px;
+            font-weight: 700;
             color: #202124;
-            background-color: #f8f9fa;
+            background: #f8f9fa;
+            border-bottom: 1px solid #f0f0f0;
             position: sticky;
             top: 0;
             z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
+        /* Match Card */
         .match-card {
-            margin: 12px 20px;
-            padding: 16px;
-            background-color: white;
+            margin: 10px 16px;
+            padding: 14px 16px;
+            background: white;
             border: 1px solid #e0e0e0;
             border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
             position: relative;
+            transition: all 0.2s;
         }
 
-        .match-card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border-color: #1a73e8;
+        .match-card.live-card {
+            border-color: #ea4335;
+            background: #fffafa;
         }
 
-        .match-sport {
-            display: inline-block;
-            padding: 4px 10px;
-            background-color: #e8f0fe;
-            color: #1a73e8;
-            font-size: 11px;
-            font-weight: 600;
-            border-radius: 12px;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
+        .match-card.completed-card { opacity: 0.8; }
 
-        .match-time-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            font-size: 12px;
-            color: #5f6368;
-            font-weight: 500;
-        }
-
-        .status-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            padding: 4px 12px;
-            background-color: #ea4335;
-            color: white;
-            font-size: 11px;
-            font-weight: 600;
-            border-radius: 12px;
-            text-transform: uppercase;
-        }
-
-        .status-badge.upcoming {
-            background-color: #fbbc04;
-        }
-
-        .match-teams {
-            margin-bottom: 8px;
-        }
-
-        .team {
+        .match-card-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
         }
 
-        .team-name {
-            font-size: 15px;
-            font-weight: 500;
-            color: #202124;
+        .sport-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            background: #e8f0fe;
+            color: #1a73e8;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 12px;
+            text-transform: uppercase;
         }
 
-        .team-score {
-            font-size: 14px;
-            font-weight: 600;
-            color: #5f6368;
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-live { background: #fce8e6; color: #ea4335; }
+        .status-scheduled { background: #fff8e1; color: #f9a825; }
+        .status-completed { background: #e6f4ea; color: #34a853; }
+
+        .live-pulse {
+            width: 7px;
+            height: 7px;
+            background: #ea4335;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .match-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .match-team-name { font-size: 14px; font-weight: 500; color: #202124; }
+
+        .match-team-score {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .score-a { color: #1a73e8; }
+        .score-b { color: #ea4335; }
+
+        .match-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 12px;
+            color: #9e9e9e;
         }
 
         .match-result {
             font-size: 12px;
             font-weight: 600;
             color: #34a853;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #f0f0f0;
         }
 
-        .winner-team {
-            color: #34a853;
+        .set-score-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .set-chip {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-weight: 600;
         }
 
-        /* Custom scrollbar */
-        .fixtures-content::-webkit-scrollbar {
-            width: 6px;
+        /* Empty / Loading */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9e9e9e;
+            font-size: 14px;
         }
 
-        .fixtures-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
         }
 
-        .fixtures-content::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        .fixtures-content::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Bottom Navigation */
+        /* Bottom Nav */
         .bottom-nav {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: white;
+            background: white;
             border-radius: 24px;
             padding: 12px 24px;
             display: flex;
             gap: 32px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
             z-index: 1000;
             max-width: 400px;
             width: calc(100% - 40px);
@@ -218,366 +224,301 @@
             align-items: center;
             gap: 4px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             flex: 1;
         }
 
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            color: #5f6368;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item.active .nav-icon {
-            color: #1a73e8;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            font-weight: 500;
-            color: #5f6368;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item.active .nav-label {
-            color: #1a73e8;
-            font-weight: 600;
-        }
-
-        .nav-item:hover .nav-icon,
-        .nav-item:hover .nav-label {
-            color: #1a73e8;
-        }
+        .nav-icon { width: 24px; height: 24px; color: #5f6368; transition: all 0.2s; }
+        .nav-item.active .nav-icon { color: #1a73e8; }
+        .nav-label { font-size: 11px; font-weight: 500; color: #5f6368; transition: all 0.2s; }
+        .nav-item.active .nav-label { color: #1a73e8; font-weight: 600; }
+        .nav-item:hover .nav-icon, .nav-item:hover .nav-label { color: #1a73e8; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            Fixtures
-        </div>
-
-        <div class="filter-tabs">
-            <div class="tab active">#All</div>
-            <div class="tab">#Cricket</div>
-            <div class="tab">#Badminton</div>
-            <div class="tab">#TT</div>
-            <div class="tab">#Football</div>
-            <div class="tab">#Chess</div>
-        </div>
-
-        <div class="fixtures-content">
-            <!-- Past Matches -->
-            <div class="date-section">
-                <div class="date-header">May 20, 2026 - Tuesday</div>
-                
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Cricket</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name winner-team">Mumbai Strikers</div>
-                            <div class="team-score">178/6 (20)</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Delhi Warriors</div>
-                            <div class="team-score">165/8 (20)</div>
-                        </div>
-                    </div>
-                    <div class="match-result">Mumbai Strikers won by 13 runs</div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Badminton</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Priya Sharma</div>
-                            <div class="team-score">21-18, 21-19</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name winner-team">Ananya Singh</div>
-                            <div class="team-score">15-21, 21-23</div>
-                        </div>
-                    </div>
-                    <div class="match-result">Ananya Singh won 2-0</div>
-                </div>
-            </div>
-
-            <div class="date-section">
-                <div class="date-header">May 21, 2026 - Wednesday</div>
-                
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Football</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Bangalore Tigers</div>
-                            <div class="team-score">2</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name winner-team">Chennai Challengers</div>
-                            <div class="team-score">3</div>
-                        </div>
-                    </div>
-                    <div class="match-result">Chennai Challengers won 3-2</div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">TT</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name winner-team">Sanjay Malhotra</div>
-                            <div class="team-score">11-9, 11-7, 11-5</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Rohan Das</div>
-                            <div class="team-score">9-11, 7-11, 5-11</div>
-                        </div>
-                    </div>
-                    <div class="match-result">Sanjay Malhotra won 3-0</div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Chess</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Vishal Anand</div>
-                            <div class="team-score">Draw</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Arun Kumar</div>
-                            <div class="team-score">Draw</div>
-                        </div>
-                    </div>
-                    <div class="match-result">Match Drawn</div>
-                </div>
-            </div>
-
-            <div class="date-section">
-                <div class="date-header">May 22, 2026 - Thursday</div>
-                
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Cricket</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name winner-team">Kolkata Knights</div>
-                            <div class="team-score">189/4 (19.3)</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Hyderabad Heroes</div>
-                            <div class="team-score">185/7 (20)</div>
-                        </div>
-                    </div>
-                    <div class="match-result">Kolkata Knights won by 6 wickets</div>
-                </div>
-            </div>
-
-            <!-- Today's Matches -->
-            <div class="date-section">
-                <div class="date-header">Today - May 25, 2026</div>
-                
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Cricket</span>
-                    <span class="status-badge">Live</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Mumbai Strikers</div>
-                            <div class="team-score">167/4 (18.2)</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Delhi Warriors</div>
-                            <div class="team-score">142/6 (20)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Badminton</span>
-                    <span class="match-time-badge">4:00 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Rahul Verma</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Arjun Mehta</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">TT</span>
-                    <span class="match-time-badge">6:00 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Kavya Nair</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Meera Iyer</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upcoming Matches -->
-            <div class="date-section">
-                <div class="date-header">Tomorrow - May 26, 2026</div>
-                
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Cricket</span>
-                    <span class="match-time-badge">2:00 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Bangalore Tigers</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Pune Panthers</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Football</span>
-                    <span class="match-time-badge">4:30 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Chennai Challengers</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Jaipur Royals</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Chess</span>
-                    <span class="match-time-badge">7:00 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Priyanka Shah</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Lakshmi Iyer</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="date-section">
-                <div class="date-header">May 27, 2026 - Tuesday</div>
-                
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Cricket</span>
-                    <span class="match-time-badge">3:00 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Delhi Warriors</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Lucknow Lions</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Badminton</span>
-                    <span class="match-time-badge">5:00 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Sneha Patel</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Divya Reddy</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="date-section">
-                <div class="date-header">May 28, 2026 - Wednesday</div>
-                
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">TT</span>
-                    <span class="match-time-badge">2:30 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Aditya Shah</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Nikhil Rao</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="match-card" onclick="openMatchDetails()">
-                    <span class="match-sport">Football</span>
-                    <span class="match-time-badge">6:00 PM</span>
-                    <div class="match-teams">
-                        <div class="team">
-                            <div class="team-name">Hyderabad Heroes</div>
-                        </div>
-                        <div class="team">
-                            <div class="team-name">Ahmedabad Aces</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container">
+    <div class="header">
+        <span>Fixtures</span>
+        <span class="header-refresh" id="lastUpdated"></span>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="navigate('home')">
-            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-            </svg>
-            <span class="nav-label">Home</span>
-        </div>
-
-        <div class="nav-item active" onclick="navigate('fixtures')">
-            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-            </svg>
-            <span class="nav-label">Fixtures</span>
-        </div>
-
-        <div class="nav-item" onclick="navigate('leaderboard')">
-            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/>
-            </svg>
-            <span class="nav-label">Leaderboard</span>
-        </div>
-
-        <div class="nav-item" onclick="navigate('stats')">
-            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
-            </svg>
-            <span class="nav-label">Stats</span>
-        </div>
+    <div class="filter-tabs" id="filterTabs">
+        <div class="tab active" data-sport="all">#All</div>
     </div>
 
-    <script>
-        function navigate(page) {
-            const pageUrls = {
-                'home': './home.html',
-                'fixtures': './fixtures.html',
-                'leaderboard': './leaderboard.html',
-                'stats': './stats.html'
-            };
-            
-            // Prevent the event from bubbling
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
+    <div class="fixtures-content" id="fixturesContent">
+        <div style="padding:16px;">
+            <div class="skeleton" style="height:90px;margin-bottom:10px;border-radius:12px;"></div>
+            <div class="skeleton" style="height:90px;margin-bottom:10px;border-radius:12px;"></div>
+            <div class="skeleton" style="height:90px;border-radius:12px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <div class="nav-item" onclick="navigate('home')">
+        <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item active" onclick="navigate('fixtures')">
+        <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+        <span class="nav-label">Fixtures</span>
+    </div>
+    <div class="nav-item" onclick="navigate('leaderboard')">
+        <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/></svg>
+        <span class="nav-label">Leaderboard</span>
+    </div>
+    <div class="nav-item" onclick="navigate('stats')">
+        <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        <span class="nav-label">Stats</span>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://izutkprvzuwrxudqvnin.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dXRrcHJ2enV3cnh1ZHF2bmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NzYxNjUsImV4cCI6MjA5NTQ1MjE2NX0.MK80nCRgep3h8BpOt-Zy4EbizrXgndLD1XQCJJHIUCU';
+
+    async function sbFetch(path) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    }
+
+    const SPORT_TABLES = {
+        'badminton':    'badminton_points',
+        'table tennis': 'tabletennis_points',
+        'volleyball':   'volleyball_points',
+        'carrom':       'carrom_points',
+        '8-ball pool':  'pool_points'
+    };
+
+    let allMatches  = [];
+    let activeSport = 'all';
+
+    // ─── Fetch all matches ────────────────────────────────────
+    async function fetchMatches() {
+        const matches = await sbFetch(
+            `matches?order=scheduled_time.asc` +
+            `&select=*,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name),sport:sports(sport_name),winner:teams!matches_winner_team_id_fkey(team_name)`
+        );
+        allMatches = matches || [];
+
+        // Enrich live + completed matches with set scores
+        const enriched = allMatches.filter(m => m.status === 'live' || m.status === 'completed');
+        await Promise.all(enriched.map(enrichMatchScores));
+    }
+
+    async function enrichMatchScores(m) {
+        const sport = (m.sport?.sport_name || '').toLowerCase();
+        const table = SPORT_TABLES[sport];
+        if (!table) return;
+
+        try {
+            const isSetBased = table === 'carrom_points' || table === 'pool_points';
+
+            if (isSetBased) {
+                const pts = await sbFetch(`${table}?match_id=eq.${m.match_id}&select=set_number,winner_team_id,points&order=set_number.asc`);
+                m._sets = (pts || []).map(p => ({
+                    set:     p.set_number,
+                    winner:  p.winner_team_id === m.team1_id ? 'A' : 'B',
+                    points:  p.points
+                }));
+                m._setsA = m._sets.filter(s => s.winner === 'A').length;
+                m._setsB = m._sets.filter(s => s.winner === 'B').length;
+            } else {
+                // Point-by-point sports: count per set
+                const pts = await sbFetch(`${table}?match_id=eq.${m.match_id}&select=set_number,winning_team_id&order=set_number.asc`);
+                if (!pts || !pts.length) { m._setsA = 0; m._setsB = 0; return; }
+
+                const setNums = [...new Set(pts.map(p => p.set_number))].sort();
+                m._sets = setNums.map(sn => {
+                    const spts = pts.filter(p => p.set_number === sn);
+                    const pA   = spts.filter(p => p.winning_team_id === m.team1_id).length;
+                    const pB   = spts.filter(p => p.winning_team_id === m.team2_id).length;
+                    return { set: sn, scoreA: pA, scoreB: pB };
+                });
+
+                const maxSet  = Math.max(...pts.map(p => p.set_number));
+                const curPts  = pts.filter(p => p.set_number === maxSet);
+                m._currentSet = maxSet;
+                m._scoreA     = curPts.filter(p => p.winning_team_id === m.team1_id).length;
+                m._scoreB     = curPts.filter(p => p.winning_team_id === m.team2_id).length;
+
+                // Sets won = sets where one team reached points_per_set
+                m._setsA = 0; m._setsB = 0;
+                m._sets.forEach(s => {
+                    if (s.scoreA >= (m.points_per_set || 21)) m._setsA++;
+                    else if (s.scoreB >= (m.points_per_set || 21)) m._setsB++;
+                });
             }
-            
-            window.location.href = pageUrls[page];
+        } catch (e) {
+            console.error('Enrich error:', e);
+        }
+    }
+
+    // ─── Render ───────────────────────────────────────────────
+    function getFiltered() {
+        if (activeSport === 'all') return allMatches;
+        return allMatches.filter(m =>
+            (m.sport?.sport_name || '').toLowerCase().includes(activeSport.toLowerCase())
+        );
+    }
+
+    function groupByDate(matches) {
+        const groups = {};
+        matches.forEach(m => {
+            const d   = m.scheduled_time ? new Date(m.scheduled_time) : null;
+            const key = d ? d.toDateString() : 'Unscheduled';
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(m);
+        });
+        return groups;
+    }
+
+    function formatDateHeader(dateStr) {
+        if (dateStr === 'Unscheduled') return 'Unscheduled';
+        const d     = new Date(dateStr);
+        const today = new Date();
+        const tmrw  = new Date(today); tmrw.setDate(today.getDate() + 1);
+        const yest  = new Date(today); yest.setDate(today.getDate() - 1);
+        if (d.toDateString() === today.toDateString()) return 'Today';
+        if (d.toDateString() === tmrw.toDateString())  return 'Tomorrow';
+        if (d.toDateString() === yest.toDateString())  return 'Yesterday';
+        return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
+    function renderSetChips(m) {
+        if (!m._sets || !m._sets.length) return '';
+        const isSetBased = !m._sets[0].scoreA && m._sets[0].scoreA !== 0;
+
+        return `<div class="set-score-chips">` +
+            m._sets.map((s, i) => {
+                const label = isSetBased
+                    ? `S${s.set}: ${s.winner === 'A' ? '✓' : ''}${s.points || 0}`
+                    : `S${s.set}: ${s.scoreA}–${s.scoreB}`;
+                const aWon  = isSetBased ? s.winner === 'A' : s.scoreA >= (m.points_per_set || 21);
+                const color = aWon ? '#1a73e8' : '#ea4335';
+                return `<span class="set-chip" style="background:${color}15;color:${color}">${label}</span>`;
+            }).join('') + `</div>`;
+    }
+
+    function buildMatchCard(m) {
+        const sport    = m.sport?.sport_name || '—';
+        const team1    = m.team1?.team_name || '—';
+        const team2    = m.team2?.team_name || '—';
+        const isLive   = m.status === 'live';
+        const isDone   = m.status === 'completed';
+        const time     = m.scheduled_time
+            ? new Date(m.scheduled_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+            : '';
+
+        let statusBadge = '';
+        if (isLive)  statusBadge = `<span class="status-badge status-live"><span class="live-pulse"></span>LIVE</span>`;
+        else if (isDone) statusBadge = `<span class="status-badge status-completed">✓ Done</span>`;
+        else statusBadge = `<span class="status-badge status-scheduled">${time}</span>`;
+
+        // Scores
+        let score1 = '', score2 = '';
+        if (isLive && m._scoreA !== undefined) {
+            score1 = `<span class="match-team-score score-a">${m._scoreA}</span>`;
+            score2 = `<span class="match-team-score score-b">${m._scoreB}</span>`;
+        }
+        if (isDone && m._setsA !== undefined) {
+            score1 = `<span class="match-team-score score-a">${m._setsA}</span>`;
+            score2 = `<span class="match-team-score score-b">${m._setsB}</span>`;
         }
 
-        function openMatchDetails() {
-            // In a real app, this would navigate to the match details page
-            alert('Opening Match Details...');
+        const winnerTag = isDone && m.winner?.team_name
+            ? `<span class="match-result">🏆 ${m.winner.team_name}</span>`
+            : '';
+
+        const setChips = (isLive || isDone) ? renderSetChips(m) : '';
+
+        return `
+            <div class="match-card ${isLive ? 'live-card' : ''} ${isDone ? 'completed-card' : ''}">
+                <div class="match-card-top">
+                    <span class="sport-badge">${sport}</span>
+                    ${statusBadge}
+                </div>
+                <div>
+                    <div class="match-team">
+                        <span class="match-team-name">${team1}</span>
+                        ${score1}
+                    </div>
+                    <div class="match-team">
+                        <span class="match-team-name">${team2}</span>
+                        ${score2}
+                    </div>
+                </div>
+                ${setChips || winnerTag ? `
+                <div class="match-footer">
+                    ${setChips}
+                    ${winnerTag}
+                </div>` : ''}
+            </div>`;
+    }
+
+    function renderFixtures() {
+        const content  = document.getElementById('fixturesContent');
+        const filtered = getFiltered();
+
+        if (!filtered.length) {
+            content.innerHTML = '<div class="empty-state">No matches found</div>';
+            return;
         }
 
-        // Smooth scroll behavior
-        document.querySelector('.fixtures-content').style.scrollBehavior = 'smooth';
-    </script>
+        const groups = groupByDate(filtered);
+        content.innerHTML = Object.entries(groups).map(([dateStr, matches]) => `
+            <div class="date-section">
+                <div class="date-header">${formatDateHeader(dateStr)}</div>
+                ${matches.map(buildMatchCard).join('')}
+            </div>`
+        ).join('');
+    }
+
+    function renderSportTabs() {
+        const tabs   = document.getElementById('filterTabs');
+        const sports = [...new Set(allMatches.map(m => m.sport?.sport_name).filter(Boolean))];
+        tabs.innerHTML = `<div class="tab active" data-sport="all">#All</div>` +
+            sports.map(s => `<div class="tab" data-sport="${s.toLowerCase()}">#${s}</div>`).join('');
+        tabs.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                activeSport = tab.dataset.sport;
+                renderFixtures();
+            });
+        });
+    }
+
+    // ─── Main loop ────────────────────────────────────────────
+    async function refresh() {
+        try {
+            await fetchMatches();
+            renderSportTabs();
+            renderFixtures();
+            document.getElementById('lastUpdated').textContent =
+                '↻ ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        } catch (e) {
+            console.error('Refresh error:', e);
+        }
+    }
+
+    function navigate(page) {
+        const urls = {
+            home: './home.html', fixtures: './fixtures.html',
+            leaderboard: './leaderboard.html', stats: './stats.html'
+        };
+        if (event) { event.preventDefault(); event.stopPropagation(); }
+        window.location.href = urls[page];
+    }
+
+    refresh();
+    // Poll every 10 seconds for live score updates
+    setInterval(refresh, 10000);
+</script>
 </body>
 </html>
