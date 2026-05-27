@@ -637,11 +637,60 @@
     </div>
 
     <script>
-        let currentStep = 1;
-        let selectedTeams = [];
-        let setCount = 1;
+        const SUPABASE_URL = 'https://izutkprvzuwrxudqvnin.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dXRrcHJ2enV3cnh1ZHF2bmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NzYxNjUsImV4cCI6MjA5NTQ1MjE2NX0.MK80nCRgep3h8BpOt-Zy4EbizrXgndLD1XQCJJHIUCU';
 
-        // Navigation function
+        const headers = {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+        };
+
+        async function supabase(path, options = {}) {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+                headers: { ...headers, ...(options.headers || {}) },
+                ...options
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Supabase error');
+            }
+            return options.method === 'POST' && options.returnData === false ? null : res.json();
+        }
+
+        // ─── State ───────────────────────────────────────────────
+        let currentStep = 1;
+        let selectedTeams = [];   // [{team_id, team_name}, ...]
+        let setCount = 1;
+        let sportsList = [];
+        let teamsList = [];
+        let selectedSportId = null;
+        let tournamentId = null;
+
+        // ─── Init ─────────────────────────────────────────────────
+        async function init() {
+            try {
+                // Load tournament (first live one)
+                const tournaments = await supabase('tournament?status=eq.live&limit=1');
+                if (!tournaments.length) return showError('No active tournament found.');
+                tournamentId = tournaments[0].tournament_id;
+
+                // Load sports
+                sportsList = await supabase('sports?order=sport_name');
+
+                // Load teams for this tournament
+                teamsList = await supabase(`teams?tournament_id=eq.${tournamentId}&order=team_name`);
+
+            } catch (e) {
+                showError('Failed to load data: ' + e.message);
+            }
+        }
+
+        function showError(msg) {
+            alert(msg);
+        }
+
+        // ─── Navigation ───────────────────────────────────────────
         function navigate(page) {
             const pageUrls = {
                 'home': './home.html',
@@ -649,165 +698,185 @@
                 'leaderboard': './leaderboard.html',
                 'stats': './stats.html'
             };
-            
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            
+            if (event) { event.preventDefault(); event.stopPropagation(); }
             window.location.href = pageUrls[page];
         }
 
-        // Start creation flow
+        // ─── Step 1: Game ─────────────────────────────────────────
         function startCreation() {
             document.getElementById('welcomeSection').style.display = 'none';
             document.getElementById('formSection').classList.add('active');
+            renderSports();
         }
 
-        // Cancel creation
-        function cancelCreation() {
-            resetForm();
+        function renderSports() {
+            const select = document.getElementById('gameSelect');
+            select.innerHTML = '<option value="">Choose a game...</option>';
+            sportsList.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.sport_id;
+                opt.textContent = s.sport_name;
+                select.appendChild(opt);
+            });
         }
 
-        // Game selection
-        document.getElementById('gameSelect').addEventListener('change', function() {
-            const nextBtn = document.getElementById('nextBtn1');
-            nextBtn.disabled = this.value === '';
+        document.getElementById('gameSelect').addEventListener('change', function () {
+            selectedSportId = this.value || null;
+            document.getElementById('nextBtn1').disabled = !selectedSportId;
         });
 
-        // Team selection
-        function toggleTeam(element, teamName) {
-            if (element.classList.contains('selected')) {
-                element.classList.remove('selected');
-                selectedTeams = selectedTeams.filter(t => t !== teamName);
-            } else {
-                if (selectedTeams.length < 2) {
-                    element.classList.add('selected');
-                    selectedTeams.push(teamName);
-                }
-            }
-            
-            const nextBtn = document.getElementById('nextBtn2');
-            nextBtn.disabled = selectedTeams.length !== 2;
+        // ─── Step 2: Teams ────────────────────────────────────────
+        function renderTeams() {
+            const container = document.getElementById('teamSelection');
+            container.innerHTML = '';
+            teamsList.forEach(team => {
+                const div = document.createElement('div');
+                div.className = 'team-option';
+                div.dataset.teamId = team.team_id;
+                div.dataset.teamName = team.team_name;
+                div.innerHTML = `
+                    <div class="team-checkbox"></div>
+                    <div class="team-name">${team.team_name}</div>
+                `;
+                div.addEventListener('click', () => toggleTeam(div, team.team_id, team.team_name));
+                container.appendChild(div);
+            });
         }
 
-        // Schedule validation
+        function toggleTeam(element, teamId, teamName) {
+            const isSelected = element.classList.contains('selected');
+            if (isSelected) {
+                element.classList.remove('selected');
+                selectedTeams = selectedTeams.filter(t => t.team_id !== teamId);
+            } else {
+                if (selectedTeams.length >= 2) return; // max 2
+                element.classList.add('selected');
+                selectedTeams.push({ team_id: teamId, team_name: teamName });
+            }
+            document.getElementById('nextBtn2').disabled = selectedTeams.length !== 2;
+        }
+
+        // ─── Step 3: Schedule ─────────────────────────────────────
         document.getElementById('scheduleDate').addEventListener('change', validateSchedule);
         document.getElementById('scheduleTime').addEventListener('change', validateSchedule);
 
         function validateSchedule() {
             const date = document.getElementById('scheduleDate').value;
             const time = document.getElementById('scheduleTime').value;
-            const nextBtn = document.getElementById('nextBtn3');
-            nextBtn.disabled = !(date && time);
+            document.getElementById('nextBtn3').disabled = !(date && time);
         }
 
-        // Set counter
+        // ─── Step 4: Sets ─────────────────────────────────────────
         function incrementSets() {
-            if (setCount < 5) {
-                setCount++;
-                document.getElementById('setCount').textContent = setCount;
-            }
+            if (setCount < 5) { setCount++; document.getElementById('setCount').textContent = setCount; }
         }
 
         function decrementSets() {
-            if (setCount > 1) {
-                setCount--;
-                document.getElementById('setCount').textContent = setCount;
-            }
+            if (setCount > 1) { setCount--; document.getElementById('setCount').textContent = setCount; }
         }
 
-        // Navigation between steps
+        // ─── Step navigation ──────────────────────────────────────
         function nextStep(step) {
-            // Hide current step
+            // Render teams when moving to step 2
+            if (step === 1) renderTeams();
+
             document.getElementById('step' + step).classList.remove('active');
-            
-            // Update step indicator
             document.getElementById('stepIndicator' + step).classList.remove('active');
             document.getElementById('stepIndicator' + step).classList.add('completed');
-            
-            // Show next step
-            const nextStepNum = step + 1;
-            document.getElementById('step' + nextStepNum).classList.add('active');
-            document.getElementById('stepIndicator' + nextStepNum).classList.add('active');
-            
-            currentStep = nextStepNum;
+
+            const next = step + 1;
+            document.getElementById('step' + next).classList.add('active');
+            document.getElementById('stepIndicator' + next).classList.add('active');
+            currentStep = next;
         }
 
         function prevStep(step) {
-            // Hide current step
             document.getElementById('step' + step).classList.remove('active');
             document.getElementById('stepIndicator' + step).classList.remove('active');
-            
-            // Show previous step
-            const prevStepNum = step - 1;
-            document.getElementById('step' + prevStepNum).classList.add('active');
-            
-            // Update step indicator
-            document.getElementById('stepIndicator' + prevStepNum).classList.remove('completed');
-            document.getElementById('stepIndicator' + prevStepNum).classList.add('active');
-            
-            currentStep = prevStepNum;
+
+            const prev = step - 1;
+            document.getElementById('step' + prev).classList.add('active');
+            document.getElementById('stepIndicator' + prev).classList.remove('completed');
+            document.getElementById('stepIndicator' + prev).classList.add('active');
+            currentStep = prev;
         }
 
-        // Create game
-        function createGame() {
-            const game = document.getElementById('gameSelect').value;
-            const date = document.getElementById('scheduleDate').value;
-            const time = document.getElementById('scheduleTime').value;
-            const points = document.getElementById('pointsPerSet').value;
+        // ─── Create Game → Supabase ───────────────────────────────
+        async function createGame() {
+            const createBtn = document.querySelector('#step4 .btn-primary');
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
 
-            console.log('Game Created:', {
-                game,
-                teams: selectedTeams,
-                date,
-                time,
-                sets: setCount,
-                pointsPerSet: points
-            });
+            try {
+                const date = document.getElementById('scheduleDate').value;
+                const time = document.getElementById('scheduleTime').value;
+                const scheduledTime = new Date(`${date}T${time}:00`).toISOString();
+                const pointsPerSet = parseInt(document.getElementById('pointsPerSet').value);
+                const setsToWin = Math.ceil(setCount / 2); // e.g. 3 sets → need 2 to win
 
-            // Hide form and show success message
-            document.getElementById('formSection').classList.remove('active');
-            document.getElementById('successMessage').classList.add('active');
+                const payload = {
+                    tournament_id: tournamentId,
+                    sport_id: selectedSportId,
+                    team1_id: selectedTeams[0].team_id,
+                    team2_id: selectedTeams[1].team_id,
+                    scheduled_time: scheduledTime,
+                    status: 'scheduled',
+                    points_per_set: pointsPerSet,
+                    sets_to_win: setsToWin
+                };
+
+                await supabase('matches', {
+                    method: 'POST',
+                    headers: { 'Prefer': 'return=minimal' },
+                    body: JSON.stringify(payload),
+                    returnData: false
+                });
+
+                // Show success
+                document.getElementById('formSection').classList.remove('active');
+                document.getElementById('successMessage').classList.add('active');
+
+            } catch (e) {
+                showError('Failed to create game: ' + e.message);
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Game';
+            }
         }
 
-        // Reset form
+        // ─── Reset ────────────────────────────────────────────────
+        function cancelCreation() { resetForm(); }
+
         function resetForm() {
-            // Reset all values
             currentStep = 1;
             selectedTeams = [];
+            selectedSportId = null;
             setCount = 1;
-            
-            // Reset form fields
+
             document.getElementById('gameSelect').value = '';
             document.getElementById('scheduleDate').value = '';
             document.getElementById('scheduleTime').value = '';
             document.getElementById('pointsPerSet').value = '21';
             document.getElementById('setCount').textContent = '1';
-            
-            // Reset team selections
-            document.querySelectorAll('.team-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            // Reset step indicators
+            document.getElementById('teamSelection').innerHTML = '';
+
             for (let i = 1; i <= 4; i++) {
                 document.getElementById('stepIndicator' + i).classList.remove('active', 'completed');
                 document.getElementById('step' + i).classList.remove('active');
             }
             document.getElementById('stepIndicator1').classList.add('active');
             document.getElementById('step1').classList.add('active');
-            
-            // Reset buttons
+
             document.getElementById('nextBtn1').disabled = true;
             document.getElementById('nextBtn2').disabled = true;
             document.getElementById('nextBtn3').disabled = true;
-            
-            // Show welcome section
+
             document.getElementById('welcomeSection').style.display = 'block';
             document.getElementById('formSection').classList.remove('active');
             document.getElementById('successMessage').classList.remove('active');
         }
+
+        // ─── Boot ─────────────────────────────────────────────────
+        init();
     </script>
 </body>
 </html>
