@@ -404,6 +404,7 @@
         .result-row .label { color: #5f6368; }
         .result-winner { font-weight: 700; color: #34a853; }
     </style>
+    <script src="auth.js"></script>
 </head>
 <body>
 <div class="app">
@@ -498,7 +499,11 @@
     let pendingSetIndex = null; // which set is about to be declared
 
     // ─── Init ────────────────────────────────────────────────
+    let currentScorer = null;
+
     async function init() {
+        currentScorer = requireAuth();
+        if (!currentScorer) return;
         if (!matchId) return showFatalError('No match ID provided.');
         try {
             const matches = await sbFetch(
@@ -530,7 +535,7 @@
             await sbFetch(`matches?match_id=eq.${matchId}`, {
                 method: 'PATCH',
                 extraHeaders: { 'Prefer': 'return=minimal' },
-                body: { status: 'live' }
+                body: { status: 'live', scorer_id: currentScorer?.id || null }
             });
 
             renderSets();
@@ -734,7 +739,8 @@
                     set_number:     i + 1,
                     winner_team_id: s.winner === 'A' ? teamA.id : teamB.id,
                     black_ball_team_id:    s.black === 'A' ? teamA.id : teamB.id,
-                    points:         parseInt(s.pointsA) + parseInt(s.pointsB)
+                    points:         parseInt(s.pointsA) + parseInt(s.pointsB),
+                        scorer_id: currentScorer?.id || null
                 }
             });
         } catch (e) {
@@ -809,7 +815,7 @@
             await sbFetch(`matches?match_id=eq.${matchId}`, {
                 method: 'PATCH',
                 extraHeaders: { 'Prefer': 'return=minimal' },
-                body: { status: 'completed', winner_team_id: winnerId }
+                body: { status: 'completed', winner_team_id: winnerId, scorer_id: currentScorer?.id || null }
             });
             showCompletionScreen(wonA > wonB ? teamA.name : wonB > wonA ? teamB.name : 'Draw');
         } catch (e) {
@@ -865,4 +871,4 @@
     init();
 </script>
 </body>
-</html>pool.html
+</html>
