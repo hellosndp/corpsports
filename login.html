@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorer Login - NPCI Sports</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+            padding: 36px 28px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: #1a73e8;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 12px;
+        }
+
+        .logo-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #202124;
+        }
+
+        .logo-sub {
+            font-size: 13px;
+            color: #5f6368;
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #202124;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+        }
+
+        .error-msg {
+            display: none;
+            background: #fce8e6;
+            color: #c62828;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .error-msg.visible { display: block; }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover { background: #1557b0; }
+        .login-btn:active { transform: scale(0.98); }
+        .login-btn:disabled { background: #b0c4e8; cursor: not-allowed; }
+
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .hint {
+            text-align: center;
+            font-size: 12px;
+            color: #9e9e9e;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <div class="logo-icon">🏆</div>
+            <div class="logo-title">NPCI Sports</div>
+            <div class="logo-sub">Scorer Login</div>
+        </div>
+
+        <div class="error-msg" id="errorMsg">Invalid username or password</div>
+
+        <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-input" id="username" placeholder="Enter your username" autocomplete="username">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="password" placeholder="Enter your password" autocomplete="current-password">
+        </div>
+
+        <button class="login-btn" id="loginBtn" onclick="handleLogin()">Login</button>
+
+        <div class="hint">Contact admin if you don't have credentials</div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://izutkprvzuwrxudqvnin.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dXRrcHJ2enV3cnh1ZHF2bmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NzYxNjUsImV4cCI6MjA5NTQ1MjE2NX0.MK80nCRgep3h8BpOt-Zy4EbizrXgndLD1XQCJJHIUCU';
+
+        // Allow login on Enter key
+        document.getElementById('password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        document.getElementById('username').addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        async function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const btn      = document.getElementById('loginBtn');
+            const errMsg   = document.getElementById('errorMsg');
+
+            if (!username || !password) {
+                errMsg.textContent = 'Please enter username and password';
+                errMsg.classList.add('visible');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Logging in...';
+            errMsg.classList.remove('visible');
+
+            try {
+                const res = await fetch(
+                    `${SUPABASE_URL}/rest/v1/scorers?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}&select=*&limit=1`,
+                    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+                );
+                const data = await res.json();
+
+                if (data && data.length > 0) {
+                    const scorer = data[0];
+                    // Save to sessionStorage
+                    sessionStorage.setItem('scorer_id',   scorer.scorer_id);
+                    sessionStorage.setItem('scorer_name', scorer.name);
+                    sessionStorage.setItem('scorer_user', scorer.username);
+                    window.location.href = 'admin.html';
+                } else {
+                    errMsg.textContent = 'Invalid username or password';
+                    errMsg.classList.add('visible');
+                    btn.disabled = false;
+                    btn.textContent = 'Login';
+                }
+            } catch (e) {
+                errMsg.textContent = 'Login failed. Please try again.';
+                errMsg.classList.add('visible');
+                btn.disabled = false;
+                btn.textContent = 'Login';
+            }
+        }
+    </script>
+</body>
+</html>
