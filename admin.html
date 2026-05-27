@@ -22,14 +22,6 @@
         }
 
         /* Header */
-        .header {
-            background-color: #1a73e8;
-            color: white;
-            padding: 16px 20px;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
         /* Matches list */
         .matches-section { padding: 20px; }
 
@@ -140,6 +132,98 @@
             color: #1a73e8;
             font-weight: 300;
         }
+
+
+        /* Hamburger & Profile Menu */
+        .header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hamburger-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .hamburger-btn:hover { background: rgba(255,255,255,0.3); }
+
+        .profile-menu {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .profile-avatar {
+            width: 44px;
+            height: 44px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .profile-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #202124;
+        }
+
+        .profile-username {
+            font-size: 13px;
+            color: #5f6368;
+            margin-top: 2px;
+        }
+
+        .profile-divider {
+            height: 1px;
+            background: #f0f0f0;
+            margin-bottom: 12px;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background: #fce8e6;
+            color: #c62828;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover { background: #f5c6c3; }
 
         /* Tabs */
         .tab-bar {
@@ -482,10 +566,27 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
+    <script src="auth.js"></script>
 </head>
 <body>
     <div class="container">
-        <div class="header">Admin Panel</div>
+        <div class="header">
+            <span>Admin Panel</span>
+            <button class="hamburger-btn" onclick="toggleMenu()" id="hamburgerBtn">☰</button>
+        </div>
+
+        <!-- Profile dropdown -->
+        <div class="profile-menu" id="profileMenu" style="display:none;">
+            <div class="profile-info">
+                <div class="profile-avatar" id="profileAvatar">A</div>
+                <div>
+                    <div class="profile-name" id="profileName">—</div>
+                    <div class="profile-username" id="profileUsername">—</div>
+                </div>
+            </div>
+            <div class="profile-divider"></div>
+            <button class="logout-btn" onclick="logout()">🚪 &nbsp;Logout</button>
+        </div>
 
         <div class="tab-bar">
             <div class="tab-btn active" id="tabScheduled" onclick="switchTab('scheduled')">Scheduled</div>
@@ -867,7 +968,8 @@
                         scheduled_time: scheduledTime,
                         status: 'scheduled',
                         points_per_set: pointsPerSet,
-                        sets_to_win: setsToWin
+                        sets_to_win: setsToWin,
+                        scorer_id: scorer?.id || null
                     }
                 });
 
