@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-Ball Pool Scorer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .app {
+            width: 100%;
+            min-height: 100vh;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 16px 20px 20px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .header-title { font-size: 18px; font-weight: 700; }
+        .spacer { width: 32px; }
+
+        .match-badge {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 4px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .match-time {
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Loading */
+        .loading-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: #5f6368;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #1a73e8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Set Panel */
+        .set-panel {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .set-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .set-header:hover { background: #f8f9fa; }
+
+        .set-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .set-number-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e8f0fe;
+            color: #1a73e8;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .set-number-badge.done { background: #e6f4ea; color: #34a853; }
+        .set-number-badge.active { background: #1a73e8; color: white; }
+
+        .set-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        .set-winner-tag {
+            font-size: 12px;
+            font-weight: 600;
+            color: #34a853;
+            background: #e6f4ea;
+            padding: 3px 10px;
+            border-radius: 10px;
+        }
+
+        .set-arrow {
+            font-size: 18px;
+            color: #9e9e9e;
+            transition: transform 0.25s ease;
+        }
+
+        .set-arrow.open { transform: rotate(180deg); }
+
+        /* Set Body */
+        .set-body {
+            display: none;
+            padding: 0 18px 18px;
+            border-top: 1px solid #f0f0f0;
+            flex-direction: column;
+            gap: 18px;
+            animation: fadeDown 0.2s ease;
+        }
+
+        .set-body.open { display: flex; }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .set-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #5f6368;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Team options */
+        .team-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .team-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .team-option:active { transform: scale(0.97); }
+
+        .radio-dot {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .team-option.sel-a { border-color: #1a73e8; background: #e8f0fe; }
+        .team-option.sel-a .radio-dot { background: #1a73e8; border-color: #1a73e8; }
+        .team-option.sel-b { border-color: #ea4335; background: #fce8e6; }
+        .team-option.sel-b .radio-dot { background: #ea4335; border-color: #ea4335; }
+
+        .team-side-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .side-a .team-side-label { color: #1a73e8; }
+        .side-b .team-side-label { color: #ea4335; }
+
+        .team-name-opt {
+            font-size: 14px;
+            font-weight: 600;
+            color: #202124;
+            padding-right: 24px;
+        }
+
+        /* Points input */
+        .points-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .points-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .points-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #5f6368;
+        }
+
+        .points-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #202124;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .points-input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+        }
+
+        /* Declare set winner button */
+        .declare-btn {
+            width: 100%;
+            padding: 14px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 4px;
+        }
+
+        .declare-btn:hover { background: #1557b0; }
+        .declare-btn:disabled { background: #b0c4e8; cursor: not-allowed; }
+
+        /* End Match button */
+        .end-btn {
+            background: #ea4335;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(234,67,53,0.3);
+            margin-top: 4px;
+        }
+
+        .end-btn:hover { background: #c5221f; }
+        .end-btn:disabled { background: #f5a9a3; box-shadow: none; cursor: not-allowed; }
+
+        /* Overlay / popup */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .overlay.visible { display: flex; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .popup {
+            background: white;
+            border-radius: 24px 24px 0 0;
+            padding: 32px 24px 40px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .popup-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            font-size: 36px;
+            box-shadow: 0 4px 16px rgba(251,191,36,0.4);
+        }
+
+        .popup-title { font-size: 22px; font-weight: 700; color: #202124; margin-bottom: 6px; }
+        .popup-sub { font-size: 14px; color: #5f6368; margin-bottom: 24px; }
+
+        .popup-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: #1a73e8; color: white; }
+        .btn-primary:hover { background: #1557b0; }
+        .btn-ghost { background: white; color: #5f6368; border: 1.5px solid #e0e0e0 !important; border: none; }
+        .btn-ghost:hover { background: #f5f5f5; }
+
+        .result-summary {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 14px;
+            color: #202124;
+        }
+
+        .result-row .label { color: #5f6368; }
+        .result-winner { font-weight: 700; color: #34a853; }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-top">
+            <button class="back-btn" onclick="history.back()">←</button>
+            <span class="header-title">8-Ball Pool</span>
+            <div class="spacer"></div>
+        </div>
+        <div class="match-badge" id="matchBadge">Loading...</div>
+        <div class="match-time" id="matchTime"></div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <div>Loading match...</div>
+    </div>
+
+    <!-- Content (hidden until loaded) -->
+    <div class="content" id="mainContent" style="display:none;">
+        <!-- Sets rendered by JS -->
+        <div id="setsContainer"></div>
+
+        <!-- End Match -->
+        <button class="end-btn" id="endBtn" onclick="openEndMatch()" disabled>
+            🏁 End Match
+        </button>
+    </div>
+</div>
+
+<!-- Declare set winner popup -->
+<div class="overlay" id="setWinnerOverlay">
+    <div class="popup">
+        <div class="popup-icon">🏆</div>
+        <div class="popup-title" id="setWinnerTitle">Declare Set Winner?</div>
+        <div class="popup-sub" id="setWinnerSub"></div>
+        <button class="popup-btn btn-primary" id="setWinnerConfirmBtn" onclick="confirmSetWinner()"></button>
+        <button class="popup-btn btn-ghost" onclick="closeOverlay('setWinnerOverlay')">Cancel</button>
+    </div>
+</div>
+
+<!-- Match winner popup -->
+<div class="overlay" id="matchOverOverlay">
+    <div class="popup">
+        <div class="popup-icon">🎉</div>
+        <div class="popup-title" id="matchOverTitle">Match Complete!</div>
+        <div class="result-summary" id="matchSummary"></div>
+        <button class="popup-btn btn-primary" onclick="finalizeMatch()">Confirm & Save</button>
+        <button class="popup-btn btn-ghost" onclick="closeOverlay('matchOverOverlay')">Cancel</button>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://izutkprvzuwrxudqvnin.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dXRrcHJ2enV3cnh1ZHF2bmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NzYxNjUsImV4cCI6MjA5NTQ1MjE2NX0.MK80nCRgep3h8BpOt-Zy4EbizrXgndLD1XQCJJHIUCU';
+
+    async function sbFetch(path, options = {}) {
+        const { extraHeaders = {}, body, method = 'GET' } = options;
+        const fetchOptions = {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                ...extraHeaders
+            }
+        };
+        if (body) fetchOptions.body = JSON.stringify(body);
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, fetchOptions);
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.message || `HTTP ${res.status}`);
+        }
+        if (method === 'POST' || method === 'PATCH') return null;
+        return res.json();
+    }
+
+    // ─── State ───────────────────────────────────────────────
+    const params  = new URLSearchParams(window.location.search);
+    const matchId = params.get('match_id');
+
+    let match   = null;
+    let teamA   = { id: null, name: '' };
+    let teamB   = { id: null, name: '' };
+    let totalSets = 3; // default, overridden by match.sets_to_win * 2 - 1
+
+    // Per-set state: array of { winner: null|'A'|'B', red: null|'A'|'B', pointsA: '', pointsB: '', done: false }
+    let sets = [];
+    let pendingSetIndex = null; // which set is about to be declared
+
+    // ─── Init ────────────────────────────────────────────────
+    async function init() {
+        if (!matchId) return showFatalError('No match ID provided.');
+        try {
+            const matches = await sbFetch(
+                `matches?match_id=eq.${matchId}&select=*,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name)&limit=1`
+            );
+            if (!matches || !matches.length) return showFatalError('Match not found.');
+            match = matches[0];
+
+            teamA = { id: match.team1.team_id, name: match.team1.team_name };
+            teamB = { id: match.team2.team_id, name: match.team2.team_name };
+
+            // Total sets = sets_to_win * 2 - 1 (e.g. best of 3 = 2 sets to win)
+            totalSets = match.sets_to_win ? (match.sets_to_win * 2 - 1) : 3;
+
+            document.getElementById('matchBadge').textContent = `Match #${matchId.slice(0,8).toUpperCase()}`;
+            if (match.scheduled_time) {
+                document.getElementById('matchTime').textContent = '📅 ' +
+                    new Date(match.scheduled_time).toLocaleString('en-IN', {
+                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                    });
+            }
+
+            // Init set state
+            sets = Array.from({ length: totalSets }, () => ({
+                winner: null, black: null, pointsA: '', pointsB: '', done: false
+            }));
+
+            // Mark live
+            await sbFetch(`matches?match_id=eq.${matchId}`, {
+                method: 'PATCH',
+                extraHeaders: { 'Prefer': 'return=minimal' },
+                body: { status: 'live' }
+            });
+
+            renderSets();
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+
+            // Open first set by default
+            toggleSet(0, true);
+
+        } catch (e) {
+            showFatalError('Failed to load: ' + e.message);
+        }
+    }
+
+    // ─── Render Sets ─────────────────────────────────────────
+    function renderSets() {
+        const container = document.getElementById('setsContainer');
+        container.innerHTML = '';
+        sets.forEach((s, i) => {
+            const panel = buildSetPanel(i);
+            container.appendChild(panel);
+        });
+        checkEndMatchReady();
+    }
+
+    function buildSetPanel(i) {
+        const s     = sets[i];
+        const setNo = i + 1;
+        const div   = document.createElement('div');
+        div.className = 'set-panel';
+        div.id = `setPanel${i}`;
+
+        const badgeClass = s.done ? 'done' : (i === currentActiveSet() ? 'active' : '');
+        const winnerTag  = s.done
+            ? `<span class="set-winner-tag">🏆 ${s.winner === 'A' ? teamA.name : teamB.name}</span>`
+            : '';
+
+        div.innerHTML = `
+            <div class="set-header" onclick="toggleSet(${i})">
+                <div class="set-header-left">
+                    <div class="set-number-badge ${badgeClass}">${setNo}</div>
+                    <div>
+                        <div class="set-label">Set ${setNo}</div>
+                        ${s.done ? `<div style="font-size:12px;color:#9e9e9e;margin-top:2px;">${s.pointsA} – ${s.pointsB} pts</div>` : ''}
+                    </div>
+                    ${winnerTag}
+                </div>
+                <span class="set-arrow" id="arrow${i}">▼</span>
+            </div>
+
+            <div class="set-body" id="setBody${i}">
+                <!-- Winner -->
+                <div>
+                    <div class="set-section-title">🏆 Winner</div>
+                    <div class="team-grid">
+                        <div class="team-option side-a ${s.winner === 'A' ? 'sel-a' : ''} ${s.done ? 'disabled-opt' : ''}"
+                             id="w${i}A" onclick="${s.done ? '' : `selectSetWinner(${i},'A')`}">
+                            <div class="radio-dot"></div>
+                            <div class="team-side-label">Team A</div>
+                            <div class="team-name-opt">${teamA.name}</div>
+                        </div>
+                        <div class="team-option side-b ${s.winner === 'B' ? 'sel-b' : ''} ${s.done ? 'disabled-opt' : ''}"
+                             id="w${i}B" onclick="${s.done ? '' : `selectSetWinner(${i},'B')`}">
+                            <div class="radio-dot"></div>
+                            <div class="team-side-label">Team B</div>
+                            <div class="team-name-opt">${teamB.name}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Black ball -->
+                <div>
+                    <div class="set-section-title">🎱 Who potted Black?</div>
+                    <div class="team-grid">
+                        <div class="team-option side-a ${s.black === 'A' ? 'sel-a' : ''} ${s.done ? 'disabled-opt' : ''}"
+                             id="r${i}A" onclick="${s.done ? '' : `selectSetBlack(${i},'A')`}">
+                            <div class="radio-dot"></div>
+                            <div class="team-side-label">Team A</div>
+                            <div class="team-name-opt">${teamA.name}</div>
+                        </div>
+                        <div class="team-option side-b ${s.black === 'B' ? 'sel-b' : ''} ${s.done ? 'disabled-opt' : ''}"
+                             id="r${i}B" onclick="${s.done ? '' : `selectSetBlack(${i},'B')`}">
+                            <div class="radio-dot"></div>
+                            <div class="team-side-label">Team B</div>
+                            <div class="team-name-opt">${teamB.name}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Points -->
+                <div>
+                    <div class="set-section-title">🎯 Points Scored</div>
+                    <div class="points-row">
+                        <div class="points-field">
+                            <div class="points-label">${teamA.name}</div>
+                            <input type="number" class="points-input" id="pts${i}A"
+                                   placeholder="0" min="0" value="${s.pointsA}"
+                                   ${s.done ? 'disabled' : ''}
+                                   oninput="updatePoints(${i},'A',this.value)">
+                        </div>
+                        <div class="points-field">
+                            <div class="points-label">${teamB.name}</div>
+                            <input type="number" class="points-input" id="pts${i}B"
+                                   placeholder="0" min="0" value="${s.pointsB}"
+                                   ${s.done ? 'disabled' : ''}
+                                   oninput="updatePoints(${i},'B',this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                ${!s.done ? `
+                <button class="declare-btn" id="declareBtn${i}"
+                        onclick="openDeclareSetWinner(${i})"
+                        ${isSetReady(i) ? '' : 'disabled'}>
+                    Declare Set ${setNo} Winner
+                </button>` : `
+                <div style="text-align:center;padding:10px;font-size:13px;color:#34a853;font-weight:600;">
+                    ✓ Set ${setNo} complete
+                </div>`}
+            </div>`;
+
+        return div;
+    }
+
+    // ─── Accordion ───────────────────────────────────────────
+    function toggleSet(i, forceOpen = false) {
+        const body  = document.getElementById(`setBody${i}`);
+        const arrow = document.getElementById(`arrow${i}`);
+        const isOpen = body.classList.contains('open');
+
+        if (forceOpen || !isOpen) {
+            body.classList.add('open');
+            arrow.classList.add('open');
+        } else {
+            body.classList.remove('open');
+            arrow.classList.remove('open');
+        }
+    }
+
+    function currentActiveSet() {
+        return sets.findIndex(s => !s.done);
+    }
+
+    // ─── Selection helpers ────────────────────────────────────
+    function selectSetWinner(i, team) {
+        sets[i].winner = team;
+        refreshSetPanel(i);
+    }
+
+    function selectSetBlack(i, team) {
+        sets[i].black = team;
+        refreshSetPanel(i);
+    }
+
+    function updatePoints(i, team, val) {
+        if (team === 'A') sets[i].pointsA = val;
+        else sets[i].pointsB = val;
+        // Update declare button
+        const btn = document.getElementById(`declareBtn${i}`);
+        if (btn) btn.disabled = !isSetReady(i);
+    }
+
+    function isSetReady(i) {
+        const s = sets[i];
+        return s.winner && s.black && s.pointsA !== '' && s.pointsB !== '';
+    }
+
+    function refreshSetPanel(i) {
+        const isOpen = document.getElementById(`setBody${i}`)?.classList.contains('open');
+        const panel  = document.getElementById(`setPanel${i}`);
+        const newPanel = buildSetPanel(i);
+        panel.replaceWith(newPanel);
+        if (isOpen) toggleSet(i, true);
+    }
+
+    // ─── Declare set winner ───────────────────────────────────
+    function openDeclareSetWinner(i) {
+        if (!isSetReady(i)) return;
+        pendingSetIndex = i;
+        const s    = sets[i];
+        const name = s.winner === 'A' ? teamA.name : teamB.name;
+        document.getElementById('setWinnerTitle').textContent = `Declare Set ${i+1} Winner?`;
+        document.getElementById('setWinnerSub').textContent =
+            `Winner: ${name} | Points: ${s.pointsA} – ${s.pointsB} | Black: ${s.black === 'A' ? teamA.name : teamB.name}`;
+        document.getElementById('setWinnerConfirmBtn').textContent = `Yes, ${name} wins Set ${i+1}`;
+        document.getElementById('setWinnerOverlay').classList.add('visible');
+    }
+
+    async function confirmSetWinner() {
+        const i = pendingSetIndex;
+        const s = sets[i];
+        closeOverlay('setWinnerOverlay');
+
+        // Save to Supabase
+        try {
+            await sbFetch('pool_points', {
+                method: 'POST',
+                extraHeaders: { 'Prefer': 'return=minimal' },
+                body: {
+                    match_id:       matchId,
+                    set_number:     i + 1,
+                    winner_team_id: s.winner === 'A' ? teamA.id : teamB.id,
+                    black_ball_team_id:    s.black === 'A' ? teamA.id : teamB.id,
+                    points:         parseInt(s.pointsA) + parseInt(s.pointsB)
+                }
+            });
+        } catch (e) {
+            console.error('Failed to save set:', e);
+        }
+
+        sets[i].done = true;
+
+        // Close this panel, open next
+        const next = i + 1;
+        renderSets();
+        // Re-open completed set (collapsed) and open next one
+        if (next < totalSets) {
+            toggleSet(next, true);
+        }
+
+        checkEndMatchReady();
+
+        // If all sets done → auto show match winner
+        if (sets.every(s => s.done)) {
+            setTimeout(() => showMatchWinner(), 400);
+        }
+    }
+
+    // ─── End Match ────────────────────────────────────────────
+    function checkEndMatchReady() {
+        const btn = document.getElementById('endBtn');
+        if (btn) btn.disabled = !sets.some(s => s.done);
+    }
+
+    function openEndMatch() {
+        showMatchWinner();
+    }
+
+    function showMatchWinner() {
+        const wonA = sets.filter(s => s.done && s.winner === 'A').length;
+        const wonB = sets.filter(s => s.done && s.winner === 'B').length;
+        const winner = wonA > wonB ? 'A' : wonB > wonA ? 'B' : null;
+        const winnerName = winner ? (winner === 'A' ? teamA.name : teamB.name) : 'Draw';
+
+        document.getElementById('matchOverTitle').textContent =
+            winner ? `${winnerName} Wins!` : 'Match Drawn';
+
+        const rows = sets.filter(s => s.done).map((s, i) => `
+            <div class="result-row">
+                <span class="label">Set ${i+1}</span>
+                <span>${s.pointsA} – ${s.pointsB} pts · 🏆 ${s.winner === 'A' ? teamA.name : teamB.name}</span>
+            </div>`).join('');
+
+        document.getElementById('matchSummary').innerHTML = `
+            ${rows}
+            <div class="result-row" style="margin-top:8px;padding-top:8px;border-top:1px solid #e0e0e0;">
+                <span class="label">Sets Won</span>
+                <span style="font-weight:700">${wonA} – ${wonB}</span>
+            </div>
+            <div class="result-row">
+                <span class="label">Winner</span>
+                <span class="result-winner">${winnerName}</span>
+            </div>`;
+
+        document.getElementById('matchOverOverlay').classList.add('visible');
+    }
+
+    async function finalizeMatch() {
+        const wonA = sets.filter(s => s.done && s.winner === 'A').length;
+        const wonB = sets.filter(s => s.done && s.winner === 'B').length;
+        const winnerId = wonA > wonB ? teamA.id : wonB > wonA ? teamB.id : null;
+
+        closeOverlay('matchOverOverlay');
+
+        try {
+            await sbFetch(`matches?match_id=eq.${matchId}`, {
+                method: 'PATCH',
+                extraHeaders: { 'Prefer': 'return=minimal' },
+                body: { status: 'completed', winner_team_id: winnerId }
+            });
+            showCompletionScreen(wonA > wonB ? teamA.name : wonB > wonA ? teamB.name : 'Draw');
+        } catch (e) {
+            alert('Failed to save: ' + e.message);
+        }
+    }
+
+    function showCompletionScreen(winnerName) {
+        document.getElementById('mainContent').style.display = 'none';
+        const wonA = sets.filter(s => s.done && s.winner === 'A').length;
+        const wonB = sets.filter(s => s.done && s.winner === 'B').length;
+
+        const setRows = sets.filter(s => s.done).map((s, i) =>
+            `<div class="result-row"><span class="label">Set ${i+1}</span><span>${s.pointsA} – ${s.pointsB}</span></div>`
+        ).join('');
+
+        const div = document.createElement('div');
+        div.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;';
+        div.innerHTML = `
+            <div style="width:80px;height:80px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:24px;box-shadow:0 4px 20px rgba(251,191,36,0.4);">🏆</div>
+            <div style="font-size:26px;font-weight:800;color:#202124;margin-bottom:8px;">${winnerName === 'Draw' ? 'Match Drawn' : winnerName + ' Wins!'}</div>
+            <div style="font-size:14px;color:#5f6368;margin-bottom:24px;">Result saved successfully</div>
+            <div style="background:#f8f9fa;border-radius:12px;padding:16px;width:100%;max-width:320px;text-align:left;">
+                ${setRows}
+                <div class="result-row" style="margin-top:8px;padding-top:8px;border-top:1px solid #e0e0e0;">
+                    <span class="label">Sets</span>
+                    <span style="font-weight:700">${wonA} – ${wonB}</span>
+                </div>
+                <div class="result-row">
+                    <span class="label">Winner</span>
+                    <span style="font-weight:700;color:#34a853">${winnerName}</span>
+                </div>
+            </div>
+            <div style="margin-top:24px;font-size:13px;color:#9e9e9e;">Redirecting...</div>`;
+        document.querySelector('.app').appendChild(div);
+        setTimeout(() => { window.location.href = 'admin.html'; }, 2500);
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────
+    function closeOverlay(id) {
+        document.getElementById(id).classList.remove('visible');
+    }
+
+    function showFatalError(msg) {
+        document.getElementById('loadingState').innerHTML = `
+            <div style="text-align:center;color:#ea4335">
+                <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+                <div>${msg}</div>
+                <button onclick="history.back()" style="margin-top:20px;padding:10px 24px;background:#1a73e8;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px">Go Back</button>
+            </div>`;
+    }
+
+    init();
+</script>
+</body>
+</html>pool.html
