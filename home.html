@@ -486,7 +486,7 @@
             const setInfo = m._currentSet ? `Set ${m._currentSet}` : '';
 
             return `
-                <div class="hero-banner" onclick="window.location.href='fixtures.html'">
+                <div class="hero-banner" data-match-id="${m.match_id}" onclick="window.location.href='livescore.html?match_id=${m.match_id}'">
                     <div class="live-indicator">
                         <div class="live-dot"></div>
                         <span class="live-text">Live</span>
@@ -532,7 +532,7 @@
                 ? new Date(m.scheduled_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
                 : '';
             return `
-                <div class="match-card" onclick="window.location.href='fixtures.html'">
+                <div class="match-card" onclick="window.location.href='livescore.html?match_id=' + this.dataset.matchId" >
                     <span class="match-sport">${sport}</span>
                     <span class="match-time-badge">${time}</span>
                     <div>
