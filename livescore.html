@@ -9,7 +9,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a3a6b;
+            background: #12121e;
             min-height: 100vh;
             color: white;
         }
@@ -19,7 +19,7 @@
         /* ── Header ── */
         .header {
             padding: 16px 20px 18px;
-            background: #1a3a6b;
+            background: #12121e;
         }
 
         .header-top {
@@ -84,7 +84,7 @@
 
         /* ── Score Hero ── */
         .score-hero {
-            background: #1a3a6b;
+            background: #12121e;
             padding: 20px 20px 28px;
         }
 
@@ -163,11 +163,12 @@
 
         @keyframes scoreBurst {
             0%   { opacity: 1; transform: scale(1); }
-            60%  { opacity: 0.6; transform: scale(1.7); }
-            100% { opacity: 0; transform: scale(2.2); }
+            40%  { opacity: 0.9; transform: scale(2.0); }
+            70%  { opacity: 0.5; transform: scale(2.6); }
+            100% { opacity: 0; transform: scale(2.8); }
         }
 
-        .burst-animate { animation: scoreBurst 0.55s ease-out forwards; }
+        .burst-animate { animation: scoreBurst 1.1s ease-out forwards; }
 
         .score-sub {
             font-size: 12px;
@@ -199,7 +200,7 @@
 
         /* ── Sets row (side by side) ── */
         .sets-row {
-            background: #163060;
+            background: #1c1c2e;
             padding: 12px 20px;
             display: flex;
             align-items: center;
@@ -260,7 +261,7 @@
             display: flex;
             justify-content: space-around;
             padding: 12px 20px;
-            background: #163060;
+            background: #1c1c2e;
             border-top: 1px solid rgba(255,255,255,0.06);
         }
 
@@ -362,6 +363,33 @@
         .badge-a { background: #e8f0fe; color: #1a73e8; }
         .badge-b { background: #fce8e6; color: #ea4335; }
 
+
+        /* ── Winner banner ── */
+        .winner-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 0 20px 16px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(245,158,11,0.35);
+            animation: bannerSlide 0.5s ease;
+        }
+
+        @keyframes bannerSlide {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .winner-trophy { font-size: 28px; }
+
+        .winner-text { text-align: center; }
+        .winner-label { font-size: 11px; font-weight: 700; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .winner-name  { font-size: 20px; font-weight: 900; color: white; }
+        .winner-sub   { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+
         .empty-log { text-align: center; padding: 28px 0; color: #bdbdbd; font-size: 14px; }
 
         .spinner-sm {
@@ -430,6 +458,9 @@
         <span class="sets-row-label">Sets</span>
         <div id="setsRowChips" style="display:flex;gap:8px;"></div>
     </div>
+
+    <!-- Winner banner (shown when match is completed) -->
+    <div id="winnerBanner" style="display:none; padding-top:16px;"></div>
 
     <!-- Match info bar -->
     <div class="match-info-bar">
@@ -549,11 +580,42 @@
         const cfg = SPORT_TABLES[sportKey];
         if (!cfg) return;
         try {
+            // Re-fetch match to check if completed
+            const updated = await sbFetch(`matches?match_id=eq.${matchId}&select=status,winner_team_id`);
+            if (updated?.[0]) {
+                const m = updated[0];
+                if (m.status === 'completed' && m.winner_team_id) {
+                    showWinnerBanner(m.winner_team_id);
+                    // swap LIVE pill to FINAL
+                    const livePill = document.querySelector('.live-pill');
+                    if (livePill && livePill.textContent.includes('LIVE')) {
+                        livePill.style.background = '#34a853';
+                        livePill.innerHTML = '✓ FINAL';
+                    }
+                }
+            }
             if (sportType === 'points') await refreshPointsMatch(cfg.table);
             else await refreshSetsMatch(cfg.table);
         } catch (e) {
             console.error('Refresh error:', e);
         }
+    }
+
+    function showWinnerBanner(winnerId) {
+        const banner = document.getElementById('winnerBanner');
+        if (banner.style.display === 'block') return; // already shown
+        const winnerName = winnerId === teamA.id ? teamA.name : teamB.name;
+        const loserName  = winnerId === teamA.id ? teamB.name : teamA.name;
+        banner.style.display = 'block';
+        banner.innerHTML = `
+            <div class="winner-banner">
+                <div class="winner-trophy">🏆</div>
+                <div class="winner-text">
+                    <div class="winner-label">Match Winner</div>
+                    <div class="winner-name">${winnerName}</div>
+                    <div class="winner-sub">defeated ${loserName}</div>
+                </div>
+            </div>`;
     }
 
     async function refreshPointsMatch(table) {
@@ -728,7 +790,7 @@
 
     function showError(msg) {
         document.getElementById('app').innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px;text-align:center;background:#1a3a6b;">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px;text-align:center;background:#12121e;">
                 <div style="font-size:36px;margin-bottom:16px;">⚠️</div>
                 <div style="font-size:16px;color:rgba(255,255,255,0.8);margin-bottom:24px;">${msg}</div>
                 <button onclick="history.back()" style="padding:12px 28px;background:#1a73e8;color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">Go Back</button>
