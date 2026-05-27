@@ -5,28 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Corporate Sports</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f5f5f5;
-            padding: 20px;
-            padding-bottom: 120px;
+            min-height: 100vh;
+            padding-bottom: 100px;
         }
 
         .container {
             max-width: 480px;
             margin: 0 auto;
             background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            min-height: 100vh;
         }
 
+        /* Header */
         .header {
             background-color: #1a73e8;
             color: white;
@@ -35,66 +30,191 @@
             font-weight: 600;
         }
 
-        .content {
-            padding: 20px;
-        }
+        /* Matches list */
+        .matches-section { padding: 20px; }
 
-        .welcome-section {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .welcome-title {
-            font-size: 24px;
+        .section-title {
+            font-size: 14px;
             font-weight: 600;
-            color: #202124;
+            color: #5f6368;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: #9e9e9e;
+            font-size: 14px;
+        }
+
+        .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+        .match-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: white;
+            position: relative;
+        }
+
+        .match-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 12px;
         }
 
-        .welcome-subtitle {
-            font-size: 14px;
-            color: #5f6368;
-            margin-bottom: 32px;
+        .sport-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 12px;
+            text-transform: uppercase;
         }
 
-        .create-btn {
+        .match-time {
+            font-size: 12px;
+            color: #9e9e9e;
+        }
+
+        .match-teams { margin-bottom: 8px; }
+
+        .match-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .match-team-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        .match-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .match-meta-item {
+            font-size: 12px;
+            color: #5f6368;
+        }
+
+        .status-badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-scheduled { background-color: #fff8e1; color: #f9a825; }
+        .status-live { background-color: #fce8e6; color: #ea4335; }
+        .status-completed { background-color: #e6f4ea; color: #34a853; }
+
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 56px;
+            height: 56px;
             background-color: #1a73e8;
             color: white;
             border: none;
-            padding: 14px 32px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 50%;
+            font-size: 28px;
             cursor: pointer;
+            box-shadow: 0 4px 16px rgba(26, 115, 232, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
+            z-index: 50;
         }
 
-        .create-btn:hover {
-            background-color: #1557b0;
-            box-shadow: 0 4px 8px rgba(26, 115, 232, 0.4);
-        }
+        .fab:hover { background-color: #1557b0; transform: scale(1.08); }
+        .fab:active { transform: scale(0.95); }
 
-        .create-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Form Section */
-        .form-section {
+        /* Drawer overlay */
+        .overlay {
             display: none;
-            padding: 20px;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
         }
 
-        .form-section.active {
-            display: block;
+        .overlay.visible { display: flex; animation: fadeOverlay 0.2s ease; }
+        @keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Drawer */
+        .drawer {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
         }
 
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .drawer-handle {
+            width: 40px;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin: 12px auto 0;
+        }
+
+        .drawer-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .drawer-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #202124;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #5f6368;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        /* Step indicator */
         .step-indicator {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
-            padding: 0 20px;
+            padding: 20px 24px 0;
         }
 
         .step {
@@ -104,44 +224,29 @@
         }
 
         .step-number {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background-color: #e0e0e0;
             color: #5f6368;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            margin: 0 auto 8px;
+            margin: 0 auto 6px;
             transition: all 0.3s ease;
         }
 
-        .step.active .step-number {
-            background-color: #1a73e8;
-            color: white;
-        }
+        .step.active .step-number { background-color: #1a73e8; color: white; }
+        .step.completed .step-number { background-color: #34a853; color: white; }
 
-        .step.completed .step-number {
-            background-color: #34a853;
-            color: white;
-        }
-
-        .step-label {
-            font-size: 11px;
-            color: #5f6368;
-            font-weight: 500;
-        }
-
-        .step.active .step-label {
-            color: #1a73e8;
-            font-weight: 600;
-        }
+        .step-label { font-size: 10px; color: #9e9e9e; font-weight: 500; }
+        .step.active .step-label { color: #1a73e8; font-weight: 600; }
 
         .step-line {
             position: absolute;
-            top: 16px;
+            top: 15px;
             left: 50%;
             width: 100%;
             height: 2px;
@@ -149,72 +254,51 @@
             z-index: -1;
         }
 
-        .step:last-child .step-line {
-            display: none;
-        }
+        .step:last-child .step-line { display: none; }
+        .step.completed .step-line { background-color: #34a853; }
 
-        .step.completed .step-line {
-            background-color: #34a853;
-        }
+        /* Form */
+        .form-body { padding: 20px; }
 
-        .form-step {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .form-step.active {
-            display: block;
-        }
+        .form-step { display: none; animation: fadeIn 0.3s ease; }
+        .form-step.active { display: block; }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .form-group {
-            margin-bottom: 24px;
-        }
+        .form-group { margin-bottom: 20px; }
 
         .form-label {
             display: block;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: #202124;
             margin-bottom: 8px;
         }
 
-        .form-select,
-        .form-input {
+        .form-select, .form-input {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid #e0e0e0;
+            border: 1.5px solid #e0e0e0;
             border-radius: 8px;
             font-size: 15px;
             color: #202124;
-            background-color: white;
+            background: white;
             transition: all 0.2s ease;
         }
 
-        .form-select:focus,
-        .form-input:focus {
+        .form-select:focus, .form-input:focus {
             outline: none;
             border-color: #1a73e8;
-            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
         }
 
-        .team-selection {
-            display: grid;
-            gap: 12px;
-        }
+        .team-selection { display: grid; gap: 10px; }
 
         .team-option {
-            padding: 16px;
+            padding: 14px 16px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             cursor: pointer;
@@ -224,263 +308,147 @@
             gap: 12px;
         }
 
-        .team-option:hover {
-            border-color: #1a73e8;
-            background-color: #f8f9fa;
-        }
-
-        .team-option.selected {
-            border-color: #1a73e8;
-            background-color: #e8f0fe;
-        }
+        .team-option:hover { border-color: #1a73e8; background: #f8f9fa; }
+        .team-option.selected { border-color: #1a73e8; background: #e8f0fe; }
 
         .team-checkbox {
             width: 20px;
             height: 20px;
-            border: 2px solid #5f6368;
+            border: 2px solid #ccc;
             border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            flex-shrink: 0;
+            transition: all 0.2s;
         }
 
         .team-option.selected .team-checkbox {
-            background-color: #1a73e8;
+            background: #1a73e8;
             border-color: #1a73e8;
         }
 
-        .team-checkbox::after {
+        .team-option.selected .team-checkbox::after {
             content: '✓';
             color: white;
-            font-size: 14px;
-            font-weight: 600;
-            display: none;
+            font-size: 13px;
+            font-weight: 700;
         }
 
-        .team-option.selected .team-checkbox::after {
-            display: block;
-        }
-
-        .team-name {
-            font-size: 15px;
-            font-weight: 500;
-            color: #202124;
-        }
+        .team-name-text { font-size: 14px; font-weight: 500; color: #202124; }
 
         .counter-group {
             display: flex;
             align-items: center;
             gap: 16px;
-            padding: 12px;
-            border: 1px solid #e0e0e0;
+            padding: 10px 16px;
+            border: 1.5px solid #e0e0e0;
             border-radius: 8px;
         }
 
         .counter-btn {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border: none;
-            background-color: #1a73e8;
+            background: #1a73e8;
             color: white;
             border-radius: 50%;
             font-size: 20px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .counter-btn:hover {
-            background-color: #1557b0;
-        }
-
-        .counter-btn:active {
-            transform: scale(0.95);
-        }
+        .counter-btn:hover { background: #1557b0; }
 
         .counter-value {
             flex: 1;
             text-align: center;
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 22px;
+            font-weight: 700;
             color: #202124;
         }
 
-        .points-input {
+        .points-row {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .points-input input {
-            width: 80px;
-        }
+        .points-row .form-input { flex: 1; }
+        .points-row span { font-size: 14px; color: #5f6368; white-space: nowrap; }
 
+        /* Form actions */
         .form-actions {
             display: flex;
-            gap: 12px;
-            margin-top: 32px;
+            gap: 10px;
+            margin-top: 24px;
+            padding-bottom: 8px;
         }
 
-        .btn-secondary,
-        .btn-primary {
+        .btn-secondary, .btn-primary {
             flex: 1;
-            padding: 14px 24px;
+            padding: 13px;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
-        .btn-secondary {
-            background-color: #f1f3f4;
-            color: #5f6368;
-        }
+        .btn-secondary { background: #f1f3f4; color: #5f6368; }
+        .btn-secondary:hover { background: #e8eaed; }
+        .btn-primary { background: #1a73e8; color: white; }
+        .btn-primary:hover { background: #1557b0; }
+        .btn-primary:disabled { background: #e0e0e0; color: #9e9e9e; cursor: not-allowed; }
 
-        .btn-secondary:hover {
-            background-color: #e8eaed;
-        }
-
-        .btn-primary {
-            background-color: #1a73e8;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #1557b0;
-        }
-
-        .btn-primary:disabled {
-            background-color: #e0e0e0;
-            color: #9e9e9e;
-            cursor: not-allowed;
-        }
-
-        /* Success Message */
-        .success-message {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .success-message.active {
-            display: block;
-        }
-
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background-color: #34a853;
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            animation: scaleIn 0.5s ease;
+            animation: spin 0.7s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
         }
 
-        @keyframes scaleIn {
-            from {
-                transform: scale(0);
-            }
-            to {
-                transform: scale(1);
-            }
-        }
-
-        .success-icon::after {
-            content: '✓';
-            color: white;
-            font-size: 48px;
-            font-weight: 600;
-        }
-
-        .success-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #202124;
-            margin-bottom: 12px;
-        }
-
-        .success-subtitle {
-            font-size: 14px;
-            color: #5f6368;
-            margin-bottom: 32px;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: white;
-            border-radius: 24px;
-            padding: 12px 24px;
-            display: flex;
-            gap: 32px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            max-width: 400px;
-            width: calc(100% - 40px);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex: 1;
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            color: #5f6368;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item.active .nav-icon {
-            color: #1a73e8;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            font-weight: 500;
-            color: #5f6368;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item.active .nav-label {
-            color: #1a73e8;
-            font-weight: 600;
-        }
-
-        .nav-item:hover .nav-icon,
-        .nav-item:hover .nav-label {
-            color: #1a73e8;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            Admin Panel
-        </div>
+        <div class="header">Admin Panel</div>
 
-        <!-- Welcome Section -->
-        <div class="content welcome-section" id="welcomeSection">
-            <div class="welcome-title">Create New Game</div>
-            <div class="welcome-subtitle">Schedule matches and manage your tournament</div>
-            <button class="create-btn" onclick="startCreation()">Create Game</button>
+        <div class="matches-section">
+            <div class="section-title">Scheduled Matches</div>
+            <div id="matchesList">
+                <div class="empty-state">
+                    <div class="empty-icon">📅</div>
+                    <div>No matches yet. Tap + to create one.</div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <!-- Form Section -->
-        <div class="form-section" id="formSection">
+    <!-- FAB -->
+    <button class="fab" onclick="openDrawer()">+</button>
+
+    <!-- Drawer Overlay -->
+    <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+        <div class="drawer" id="drawer">
+            <div class="drawer-handle"></div>
+            <div class="drawer-header">
+                <span class="drawer-title">Create New Game</span>
+                <button class="close-btn" onclick="closeDrawer()">✕</button>
+            </div>
+
             <!-- Step Indicator -->
             <div class="step-indicator">
                 <div class="step active" id="stepIndicator1">
@@ -504,135 +472,72 @@
                 </div>
             </div>
 
-            <!-- Step 1: Select Game -->
-            <div class="form-step active" id="step1">
-                <div class="form-group">
-                    <label class="form-label">Select Game</label>
-                    <select class="form-select" id="gameSelect">
-                        <option value="">Choose a game...</option>
-                        <option value="cricket">Cricket</option>
-                        <option value="badminton">Badminton</option>
-                        <option value="tt">Table Tennis</option>
-                        <option value="football">Football</option>
-                        <option value="chess">Chess</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-secondary" onclick="cancelCreation()">Cancel</button>
-                    <button class="btn-primary" id="nextBtn1" onclick="nextStep(1)" disabled>Next</button>
-                </div>
-            </div>
-
-            <!-- Step 2: Select Teams -->
-            <div class="form-step" id="step2">
-                <div class="form-group">
-                    <label class="form-label">Select Teams (Choose 2)</label>
-                    <div class="team-selection" id="teamSelection">
-                        <div class="team-option" onclick="toggleTeam(this, 'Mumbai Strikers')">
-                            <div class="team-checkbox"></div>
-                            <div class="team-name">Mumbai Strikers</div>
-                        </div>
-                        <div class="team-option" onclick="toggleTeam(this, 'Delhi Warriors')">
-                            <div class="team-checkbox"></div>
-                            <div class="team-name">Delhi Warriors</div>
-                        </div>
-                        <div class="team-option" onclick="toggleTeam(this, 'Bangalore Tigers')">
-                            <div class="team-checkbox"></div>
-                            <div class="team-name">Bangalore Tigers</div>
-                        </div>
-                        <div class="team-option" onclick="toggleTeam(this, 'Chennai Challengers')">
-                            <div class="team-checkbox"></div>
-                            <div class="team-name">Chennai Challengers</div>
-                        </div>
-                        <div class="team-option" onclick="toggleTeam(this, 'Kolkata Knights')">
-                            <div class="team-checkbox"></div>
-                            <div class="team-name">Kolkata Knights</div>
-                        </div>
+            <div class="form-body">
+                <!-- Step 1: Game -->
+                <div class="form-step active" id="step1">
+                    <div class="form-group">
+                        <label class="form-label">Select Game</label>
+                        <select class="form-select" id="gameSelect">
+                            <option value="">Loading sports...</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="closeDrawer()">Cancel</button>
+                        <button class="btn-primary" id="nextBtn1" onclick="nextStep(1)" disabled>Next</button>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button class="btn-secondary" onclick="prevStep(2)">Back</button>
-                    <button class="btn-primary" id="nextBtn2" onclick="nextStep(2)" disabled>Next</button>
-                </div>
-            </div>
 
-            <!-- Step 3: Schedule Time -->
-            <div class="form-step" id="step3">
-                <div class="form-group">
-                    <label class="form-label">Schedule Date</label>
-                    <input type="date" class="form-input" id="scheduleDate">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Schedule Time</label>
-                    <input type="time" class="form-input" id="scheduleTime">
-                </div>
-                <div class="form-actions">
-                    <button class="btn-secondary" onclick="prevStep(3)">Back</button>
-                    <button class="btn-primary" id="nextBtn3" onclick="nextStep(3)" disabled>Next</button>
-                </div>
-            </div>
-
-            <!-- Step 4: Set Count & Points -->
-            <div class="form-step" id="step4">
-                <div class="form-group">
-                    <label class="form-label">Number of Sets</label>
-                    <div class="counter-group">
-                        <button class="counter-btn" onclick="decrementSets()">-</button>
-                        <div class="counter-value" id="setCount">1</div>
-                        <button class="counter-btn" onclick="incrementSets()">+</button>
+                <!-- Step 2: Teams -->
+                <div class="form-step" id="step2">
+                    <div class="form-group">
+                        <label class="form-label">Select 2 Teams</label>
+                        <div class="team-selection" id="teamSelection"></div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="prevStep(2)">Back</button>
+                        <button class="btn-primary" id="nextBtn2" onclick="nextStep(2)" disabled>Next</button>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Points per Set</label>
-                    <div class="points-input">
-                        <input type="number" class="form-input" id="pointsPerSet" value="21" min="1">
-                        <span style="color: #5f6368; font-size: 14px;">points</span>
+
+                <!-- Step 3: Schedule -->
+                <div class="form-step" id="step3">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-input" id="scheduleDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="time" class="form-input" id="scheduleTime">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="prevStep(3)">Back</button>
+                        <button class="btn-primary" id="nextBtn3" onclick="nextStep(3)" disabled>Next</button>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button class="btn-secondary" onclick="prevStep(4)">Back</button>
-                    <button class="btn-primary" onclick="createGame()">Create Game</button>
+
+                <!-- Step 4: Sets & Points -->
+                <div class="form-step" id="step4">
+                    <div class="form-group">
+                        <label class="form-label">Number of Sets</label>
+                        <div class="counter-group">
+                            <button class="counter-btn" onclick="decrementSets()">−</button>
+                            <div class="counter-value" id="setCount">1</div>
+                            <button class="counter-btn" onclick="incrementSets()">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Points per Set</label>
+                        <div class="points-row">
+                            <input type="number" class="form-input" id="pointsPerSet" value="21" min="1">
+                            <span>points to win</span>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="prevStep(4)">Back</button>
+                        <button class="btn-primary" id="createBtn" onclick="createGame()">Create Game</button>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Success Message -->
-        <div class="success-message" id="successMessage">
-            <div class="success-icon"></div>
-            <div class="success-title">Game Created!</div>
-            <div class="success-subtitle">Your game has been scheduled successfully</div>
-            <button class="create-btn" onclick="resetForm()">Create Another Game</button>
-        </div>
-    </div>
-
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="navigate('home')">
-            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-            </svg>
-            <span class="nav-label">Home</span>
-        </div>
-
-        <div class="nav-item" onclick="navigate('fixtures')">
-            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-            </svg>
-            <span class="nav-label">Fixtures</span>
-        </div>
-
-        <div class="nav-item" onclick="navigate('leaderboard')">
-            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/>
-            </svg>
-            <span class="nav-label">Leaderboard</span>
-        </div>
-
-        <div class="nav-item" onclick="navigate('stats')">
-            <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
-            </svg>
-            <span class="nav-label">Stats</span>
         </div>
     </div>
 
@@ -640,75 +545,123 @@
         const SUPABASE_URL = 'https://izutkprvzuwrxudqvnin.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dXRrcHJ2enV3cnh1ZHF2bmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NzYxNjUsImV4cCI6MjA5NTQ1MjE2NX0.MK80nCRgep3h8BpOt-Zy4EbizrXgndLD1XQCJJHIUCU';
 
-        const headers = {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-        };
-
-        async function supabase(path, options = {}) {
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-                headers: { ...headers, ...(options.headers || {}) },
-                ...options
-            });
+        async function sbFetch(path, options = {}) {
+            const { extraHeaders = {}, body, method = 'GET' } = options;
+            const fetchOptions = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    ...extraHeaders
+                }
+            };
+            if (body) fetchOptions.body = JSON.stringify(body);
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, fetchOptions);
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.message || 'Supabase error');
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `HTTP ${res.status}`);
             }
-            return options.method === 'POST' && options.returnData === false ? null : res.json();
+            if (method === 'POST') return null;
+            return res.json();
         }
 
-        // ─── State ───────────────────────────────────────────────
+        // ─── State ───────────────────────────────────────────
         let currentStep = 1;
-        let selectedTeams = [];   // [{team_id, team_name}, ...]
+        let selectedTeams = [];
         let setCount = 1;
         let sportsList = [];
         let teamsList = [];
         let selectedSportId = null;
         let tournamentId = null;
+        let matchesList = [];
 
-        // ─── Init ─────────────────────────────────────────────────
+        // ─── Init ─────────────────────────────────────────────
         async function init() {
             try {
-                // Load tournament (first live one)
-                const tournaments = await supabase('tournament?status=eq.live&limit=1');
-                if (!tournaments.length) return showError('No active tournament found.');
-                tournamentId = tournaments[0].tournament_id;
+                const tournaments = await sbFetch('tournament?select=*&limit=5');
+                if (!tournaments || !tournaments.length) return showError('No tournaments found.');
+                const live = tournaments.find(t => t.status === 'live') || tournaments[0];
+                tournamentId = live.tournament_id;
 
-                // Load sports
-                sportsList = await supabase('sports?order=sport_name');
+                sportsList = await sbFetch('sports?order=sport_name');
+                teamsList = await sbFetch(`teams?tournament_id=eq.${tournamentId}&order=team_name`);
 
-                // Load teams for this tournament
-                teamsList = await supabase(`teams?tournament_id=eq.${tournamentId}&order=team_name`);
-
+                await loadMatches();
             } catch (e) {
-                showError('Failed to load data: ' + e.message);
+                console.error(e);
+                showError('Failed to load: ' + e.message);
             }
         }
 
-        function showError(msg) {
-            alert(msg);
+        // ─── Load & Render Matches ────────────────────────────
+        async function loadMatches() {
+            try {
+                const matches = await sbFetch(
+                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=*,team1:teams!matches_team1_id_fkey(team_name),team2:teams!matches_team2_id_fkey(team_name),sport:sports(sport_name)`
+                );
+                matchesList = matches || [];
+                renderMatches();
+            } catch (e) {
+                console.error('Failed to load matches:', e);
+            }
         }
 
-        // ─── Navigation ───────────────────────────────────────────
-        function navigate(page) {
-            const pageUrls = {
-                'home': './home.html',
-                'fixtures': './fixtures.html',
-                'leaderboard': './leaderboard.html',
-                'stats': './stats.html'
-            };
-            if (event) { event.preventDefault(); event.stopPropagation(); }
-            window.location.href = pageUrls[page];
+        function renderMatches() {
+            const container = document.getElementById('matchesList');
+            if (!matchesList.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <div>No matches yet. Tap + to create one.</div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = matchesList.map(m => {
+                const time = m.scheduled_time
+                    ? new Date(m.scheduled_time).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+                    : '—';
+                const sport = m.sport?.sport_name || '—';
+                const team1 = m.team1?.team_name || '—';
+                const team2 = m.team2?.team_name || '—';
+                const statusClass = `status-${m.status || 'scheduled'}`;
+
+                return `
+                    <div class="match-card">
+                        <div class="match-card-top">
+                            <span class="sport-badge">${sport}</span>
+                            <span class="match-time">${time}</span>
+                        </div>
+                        <div class="match-teams">
+                            <div class="match-team"><span class="match-team-name">${team1}</span></div>
+                            <div class="match-team"><span class="match-team-name">${team2}</span></div>
+                        </div>
+                        <div class="match-meta">
+                            <span class="match-meta-item">Sets to win: ${m.sets_to_win}</span>
+                            <span class="match-meta-item">Points/set: ${m.points_per_set}</span>
+                            <span class="status-badge ${statusClass}">${m.status}</span>
+                        </div>
+                    </div>`;
+            }).join('');
         }
 
-        // ─── Step 1: Game ─────────────────────────────────────────
-        function startCreation() {
-            document.getElementById('welcomeSection').style.display = 'none';
-            document.getElementById('formSection').classList.add('active');
+        // ─── Drawer ───────────────────────────────────────────
+        function openDrawer() {
             renderSports();
+            document.getElementById('overlay').classList.add('visible');
         }
 
+        function closeDrawer() {
+            document.getElementById('overlay').classList.remove('visible');
+            resetForm();
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('overlay')) closeDrawer();
+        }
+
+        // ─── Step 1: Sports ───────────────────────────────────
         function renderSports() {
             const select = document.getElementById('gameSelect');
             select.innerHTML = '<option value="">Choose a game...</option>';
@@ -718,72 +671,60 @@
                 opt.textContent = s.sport_name;
                 select.appendChild(opt);
             });
+            select.onchange = function () {
+                selectedSportId = this.value || null;
+                document.getElementById('nextBtn1').disabled = !selectedSportId;
+            };
         }
 
-        document.getElementById('gameSelect').addEventListener('change', function () {
-            selectedSportId = this.value || null;
-            document.getElementById('nextBtn1').disabled = !selectedSportId;
-        });
-
-        // ─── Step 2: Teams ────────────────────────────────────────
+        // ─── Step 2: Teams ────────────────────────────────────
         function renderTeams() {
             const container = document.getElementById('teamSelection');
             container.innerHTML = '';
+            selectedTeams = [];
             teamsList.forEach(team => {
                 const div = document.createElement('div');
                 div.className = 'team-option';
-                div.dataset.teamId = team.team_id;
-                div.dataset.teamName = team.team_name;
-                div.innerHTML = `
-                    <div class="team-checkbox"></div>
-                    <div class="team-name">${team.team_name}</div>
-                `;
-                div.addEventListener('click', () => toggleTeam(div, team.team_id, team.team_name));
+                div.innerHTML = `<div class="team-checkbox"></div><div class="team-name-text">${team.team_name}</div>`;
+                div.onclick = () => toggleTeam(div, team.team_id, team.team_name);
                 container.appendChild(div);
             });
         }
 
-        function toggleTeam(element, teamId, teamName) {
-            const isSelected = element.classList.contains('selected');
-            if (isSelected) {
-                element.classList.remove('selected');
+        function toggleTeam(el, teamId, teamName) {
+            if (el.classList.contains('selected')) {
+                el.classList.remove('selected');
                 selectedTeams = selectedTeams.filter(t => t.team_id !== teamId);
             } else {
-                if (selectedTeams.length >= 2) return; // max 2
-                element.classList.add('selected');
+                if (selectedTeams.length >= 2) return;
+                el.classList.add('selected');
                 selectedTeams.push({ team_id: teamId, team_name: teamName });
             }
             document.getElementById('nextBtn2').disabled = selectedTeams.length !== 2;
         }
 
-        // ─── Step 3: Schedule ─────────────────────────────────────
-        document.getElementById('scheduleDate').addEventListener('change', validateSchedule);
-        document.getElementById('scheduleTime').addEventListener('change', validateSchedule);
+        // ─── Step 3: Schedule ─────────────────────────────────
+        function setupScheduleListeners() {
+            document.getElementById('scheduleDate').onchange = validateSchedule;
+            document.getElementById('scheduleTime').onchange = validateSchedule;
+        }
 
         function validateSchedule() {
-            const date = document.getElementById('scheduleDate').value;
-            const time = document.getElementById('scheduleTime').value;
-            document.getElementById('nextBtn3').disabled = !(date && time);
+            const d = document.getElementById('scheduleDate').value;
+            const t = document.getElementById('scheduleTime').value;
+            document.getElementById('nextBtn3').disabled = !(d && t);
         }
 
-        // ─── Step 4: Sets ─────────────────────────────────────────
-        function incrementSets() {
-            if (setCount < 5) { setCount++; document.getElementById('setCount').textContent = setCount; }
-        }
+        // ─── Step 4: Sets ─────────────────────────────────────
+        function incrementSets() { if (setCount < 5) { setCount++; document.getElementById('setCount').textContent = setCount; } }
+        function decrementSets() { if (setCount > 1) { setCount--; document.getElementById('setCount').textContent = setCount; } }
 
-        function decrementSets() {
-            if (setCount > 1) { setCount--; document.getElementById('setCount').textContent = setCount; }
-        }
-
-        // ─── Step navigation ──────────────────────────────────────
+        // ─── Step Navigation ──────────────────────────────────
         function nextStep(step) {
-            // Render teams when moving to step 2
-            if (step === 1) renderTeams();
-
+            if (step === 1) { renderTeams(); setupScheduleListeners(); }
             document.getElementById('step' + step).classList.remove('active');
             document.getElementById('stepIndicator' + step).classList.remove('active');
             document.getElementById('stepIndicator' + step).classList.add('completed');
-
             const next = step + 1;
             document.getElementById('step' + next).classList.add('active');
             document.getElementById('stepIndicator' + next).classList.add('active');
@@ -793,7 +734,6 @@
         function prevStep(step) {
             document.getElementById('step' + step).classList.remove('active');
             document.getElementById('stepIndicator' + step).classList.remove('active');
-
             const prev = step - 1;
             document.getElementById('step' + prev).classList.add('active');
             document.getElementById('stepIndicator' + prev).classList.remove('completed');
@@ -801,58 +741,52 @@
             currentStep = prev;
         }
 
-        // ─── Create Game → Supabase ───────────────────────────────
+        // ─── Create Game ──────────────────────────────────────
         async function createGame() {
-            const createBtn = document.querySelector('#step4 .btn-primary');
-            createBtn.disabled = true;
-            createBtn.textContent = 'Creating...';
+            const btn = document.getElementById('createBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Creating...';
 
             try {
                 const date = document.getElementById('scheduleDate').value;
                 const time = document.getElementById('scheduleTime').value;
                 const scheduledTime = new Date(`${date}T${time}:00`).toISOString();
                 const pointsPerSet = parseInt(document.getElementById('pointsPerSet').value);
-                const setsToWin = Math.ceil(setCount / 2); // e.g. 3 sets → need 2 to win
+                const setsToWin = Math.ceil(setCount / 2);
 
-                const payload = {
-                    tournament_id: tournamentId,
-                    sport_id: selectedSportId,
-                    team1_id: selectedTeams[0].team_id,
-                    team2_id: selectedTeams[1].team_id,
-                    scheduled_time: scheduledTime,
-                    status: 'scheduled',
-                    points_per_set: pointsPerSet,
-                    sets_to_win: setsToWin
-                };
-
-                await supabase('matches', {
+                await sbFetch('matches', {
                     method: 'POST',
-                    headers: { 'Prefer': 'return=minimal' },
-                    body: JSON.stringify(payload),
-                    returnData: false
+                    extraHeaders: { 'Prefer': 'return=minimal' },
+                    body: {
+                        tournament_id: tournamentId,
+                        sport_id: selectedSportId,
+                        team1_id: selectedTeams[0].team_id,
+                        team2_id: selectedTeams[1].team_id,
+                        scheduled_time: scheduledTime,
+                        status: 'scheduled',
+                        points_per_set: pointsPerSet,
+                        sets_to_win: setsToWin
+                    }
                 });
 
-                // Show success
-                document.getElementById('formSection').classList.remove('active');
-                document.getElementById('successMessage').classList.add('active');
+                closeDrawer();
+                await loadMatches(); // refresh list
 
             } catch (e) {
+                console.error(e);
                 showError('Failed to create game: ' + e.message);
-                createBtn.disabled = false;
-                createBtn.textContent = 'Create Game';
+                btn.disabled = false;
+                btn.textContent = 'Create Game';
             }
         }
 
-        // ─── Reset ────────────────────────────────────────────────
-        function cancelCreation() { resetForm(); }
-
+        // ─── Reset ────────────────────────────────────────────
         function resetForm() {
             currentStep = 1;
             selectedTeams = [];
             selectedSportId = null;
             setCount = 1;
 
-            document.getElementById('gameSelect').value = '';
             document.getElementById('scheduleDate').value = '';
             document.getElementById('scheduleTime').value = '';
             document.getElementById('pointsPerSet').value = '21';
@@ -865,17 +799,15 @@
             }
             document.getElementById('stepIndicator1').classList.add('active');
             document.getElementById('step1').classList.add('active');
-
             document.getElementById('nextBtn1').disabled = true;
             document.getElementById('nextBtn2').disabled = true;
             document.getElementById('nextBtn3').disabled = true;
-
-            document.getElementById('welcomeSection').style.display = 'block';
-            document.getElementById('formSection').classList.remove('active');
-            document.getElementById('successMessage').classList.remove('active');
+            document.getElementById('createBtn').disabled = false;
+            document.getElementById('createBtn').textContent = 'Create Game';
         }
 
-        // ─── Boot ─────────────────────────────────────────────────
+        function showError(msg) { alert(msg); }
+
         init();
     </script>
 </body>
