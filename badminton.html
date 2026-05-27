@@ -428,6 +428,7 @@
 
         .result-row .label { color: #5f6368; }
     </style>
+    <script src="auth.js"></script>
 </head>
 <body>
 <div class="app">
@@ -587,7 +588,11 @@
     let isSaving = false;
 
     // ─── Init ────────────────────────────────────────────────
+    let currentScorer = null;
+
     async function init() {
+        currentScorer = requireAuth();
+        if (!currentScorer) return;
         if (!matchId) return showFatalError('No match ID provided.');
         try {
             const matches = await sbFetch(
@@ -615,7 +620,7 @@
             await sbFetch(`matches?match_id=eq.${matchId}`, {
                 method: 'PATCH',
                 extraHeaders: { 'Prefer': 'return=minimal' },
-                body: { status: 'live' }
+                body: { status: 'live', scorer_id: currentScorer?.id || null }
             });
 
             document.getElementById('loadingState').style.display = 'none';
@@ -646,7 +651,8 @@
                         match_id: matchId,
                         set_number: currentSet,
                         winning_team_id: team === 'A' ? teamA.id : teamB.id,
-                        serving_team_id: null
+                        serving_team_id: null,
+                        scorer_id: currentScorer?.id || null
                     }
                 });
             } catch (e) {
@@ -765,7 +771,7 @@
             await sbFetch(`matches?match_id=eq.${matchId}`, {
                 method: 'PATCH',
                 extraHeaders: { 'Prefer': 'return=minimal' },
-                body: { status: 'completed', winner_team_id: winnerId }
+                body: { status: 'completed', winner_team_id: winnerId, scorer_id: currentScorer?.id || null }
             });
             document.getElementById('completionSubtitle').textContent = 'Result saved! Redirecting...';
             setTimeout(() => { window.location.href = 'admin.html'; }, 2000);
