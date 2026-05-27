@@ -1012,7 +1012,29 @@
 
         function showError(msg) { alert(msg); }
 
-        init();
+        // ─── Auth + Profile ───────────────────────────────────
+        let scorer = null;
+
+        function toggleMenu() {
+            const menu = document.getElementById('profileMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.profile-menu') && !e.target.closest('.hamburger-btn')) {
+                const menu = document.getElementById('profileMenu');
+                if (menu) menu.style.display = 'none';
+            }
+        });
+
+        // ─── Boot ─────────────────────────────────────────────
+        scorer = requireAuth();
+        if (scorer) {
+            document.getElementById('profileName').textContent     = scorer.name;
+            document.getElementById('profileUsername').textContent = '@' + scorer.username;
+            document.getElementById('profileAvatar').textContent   = scorer.name.charAt(0).toUpperCase();
+            init();
+        }
     </script>
 </body>
 </html>
