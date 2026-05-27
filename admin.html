@@ -141,6 +141,49 @@
             font-weight: 300;
         }
 
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #5f6368;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #1a73e8;
+            border-bottom-color: #1a73e8;
+        }
+
+        .match-card-completed {
+            opacity: 0.85;
+        }
+
+        .winner-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #e6f4ea;
+            color: #34a853;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 8px;
+            margin-top: 6px;
+        }
+
         /* FAB */
         .fab {
             position: fixed;
@@ -444,14 +487,13 @@
     <div class="container">
         <div class="header">Admin Panel</div>
 
+        <div class="tab-bar">
+            <div class="tab-btn active" id="tabScheduled" onclick="switchTab('scheduled')">Scheduled</div>
+            <div class="tab-btn" id="tabCompleted" onclick="switchTab('completed')">Completed</div>
+        </div>
+
         <div class="matches-section">
-            <div class="section-title">Scheduled Matches</div>
-            <div id="matchesList">
-                <div class="empty-state">
-                    <div class="empty-icon">📅</div>
-                    <div>No matches yet. Tap + to create one.</div>
-                </div>
-            </div>
+            <div id="matchesList"></div>
         </div>
     </div>
 
@@ -613,10 +655,19 @@
         }
 
         // ─── Load & Render Matches ────────────────────────────
+        let activeTab = 'scheduled';
+
+        function switchTab(tab) {
+            activeTab = tab;
+            document.getElementById('tabScheduled').classList.toggle('active', tab === 'scheduled');
+            document.getElementById('tabCompleted').classList.toggle('active', tab === 'completed');
+            renderMatches();
+        }
+
         async function loadMatches() {
             try {
                 const matches = await sbFetch(
-                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=*,team1:teams!matches_team1_id_fkey(team_name),team2:teams!matches_team2_id_fkey(team_name),sport:sports(sport_name)`
+                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=*,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name),sport:sports(sport_name),winner:teams!matches_winner_team_id_fkey(team_name)`
                 );
                 matchesList = matches || [];
                 renderMatches();
@@ -644,16 +695,26 @@
 
         function renderMatches() {
             const container = document.getElementById('matchesList');
-            if (!matchesList.length) {
+
+            const filtered = matchesList.filter(m =>
+                activeTab === 'completed'
+                    ? m.status === 'completed'
+                    : m.status !== 'completed'
+            );
+
+            if (!filtered.length) {
+                const msg = activeTab === 'completed'
+                    ? 'No completed matches yet.'
+                    : 'No matches yet. Tap + to create one.';
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📅</div>
-                        <div>No matches yet. Tap + to create one.</div>
+                        <div class="empty-icon">${activeTab === 'completed' ? '🏆' : '📅'}</div>
+                        <div>${msg}</div>
                     </div>`;
                 return;
             }
 
-            container.innerHTML = matchesList.map(m => {
+            container.innerHTML = filtered.map(m => {
                 const time = m.scheduled_time
                     ? new Date(m.scheduled_time).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
                     : '—';
@@ -661,10 +722,11 @@
                 const team1 = m.team1?.team_name || '—';
                 const team2 = m.team2?.team_name || '—';
                 const statusClass = `status-${m.status || 'scheduled'}`;
-                const clickable = getScorerPage(sport);
+                const clickable = activeTab !== 'completed' && getScorerPage(sport);
+                const winnerName = m.winner?.team_name || null;
 
                 return `
-                    <div class="match-card ${clickable ? 'match-card-clickable' : ''}"
+                    <div class="match-card ${clickable ? 'match-card-clickable' : ''} ${m.status === 'completed' ? 'match-card-completed' : ''}"
                          ${clickable ? `onclick="openScorer('${m.match_id}', '${sport}')"` : ''}>
                         <div class="match-card-top">
                             <span class="sport-badge">${sport}</span>
@@ -679,6 +741,7 @@
                             <span class="match-meta-item">Points/set: ${m.points_per_set}</span>
                             <span class="status-badge ${statusClass}">${m.status}</span>
                         </div>
+                        ${winnerName ? `<div class="winner-tag">🏆 ${winnerName}</div>` : ''}
                         ${clickable ? '<div class="match-card-arrow">›</div>' : ''}
                     </div>`;
             }).join('');
