@@ -437,8 +437,12 @@
 
         const setChips = (isLive || isDone) ? renderSetChips(m) : '';
 
+        const clickHandler = isLive
+            ? `onclick="window.location.href='livescore.html?match_id=${m.match_id}'"`
+            : '';
+
         return `
-            <div class="match-card ${isLive ? 'live-card' : ''} ${isDone ? 'completed-card' : ''}">
+            <div class="match-card ${isLive ? 'live-card' : ''} ${isDone ? 'completed-card' : ''}" ${clickHandler} style="${isLive ? 'cursor:pointer;' : ''}">
                 <div class="match-card-top">
                     <span class="sport-badge">${sport}</span>
                     ${statusBadge}
