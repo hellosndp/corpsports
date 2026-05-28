@@ -656,12 +656,11 @@
     // ─── Scoring ─────────────────────────────────────────────
     async function adjustScore(team, delta) {
         if (delta < 0 && scores[team] <= 0) return;
-        if (isSaving) return;
-
-        isSaving = true;
+        if (delta > 0 && isSaving) return; // prevent rapid double-tap on +
 
         if (delta > 0) {
-            // Optimistically update UI first
+            isSaving = true;
+            // Update UI immediately
             scores[team]++;
             document.getElementById('score' + team).textContent = scores[team];
 
@@ -678,7 +677,7 @@
                     }
                 });
             } catch (e) {
-                // Rollback on failure
+                // Rollback UI on failure
                 scores[team]--;
                 document.getElementById('score' + team).textContent = scores[team];
                 console.error('Failed to save point:', e);
@@ -694,39 +693,33 @@
                 set: currentSet
             });
             renderLog();
+            isSaving = false;
 
-            // Set won when a team reaches points_per_set
+            // Trigger set winner popup if max points reached
             if (scores[team] >= match.points_per_set) {
-                isSaving = false;
                 triggerSetWinnerPopup(team);
-                return;
             }
 
         } else {
-            // Delete last point for this team in current set from DB
-            try {
-                // Find the latest point_id for this team in this set
-                const latest = await sbFetch(
-                    `badminton_points?match_id=eq.${matchId}&set_number=eq.${currentSet}&winning_team_id=eq.${team === 'A' ? teamA.id : teamB.id}&order=last_updated.desc&limit=1&select=point_id`
-                );
+            // Minus: update UI immediately, delete from DB in background
+            scores[team]--;
+            document.getElementById('score' + team).textContent = scores[team];
+            const idx = pointLog.findIndex(e => e.team === team);
+            if (idx !== -1) pointLog.splice(idx, 1);
+            renderLog();
+
+            // Fire-and-forget delete
+            sbFetch(
+                `badminton_points?match_id=eq.${matchId}&set_number=eq.${currentSet}&winning_team_id=eq.${team === 'A' ? teamA.id : teamB.id}&order=last_updated.desc&limit=1&select=point_id`
+            ).then(latest => {
                 if (latest && latest.length > 0) {
-                    await sbFetch(`badminton_points?point_id=eq.${latest[0].point_id}`, {
+                    sbFetch(`badminton_points?point_id=eq.${latest[0].point_id}`, {
                         method: 'DELETE',
                         extraHeaders: { 'Prefer': 'return=minimal' }
-                    });
-                    scores[team]--;
-                    document.getElementById('score' + team).textContent = scores[team];
-                    // Remove from log
-                    const idx = pointLog.findIndex(e => e.team === team);
-                    if (idx !== -1) pointLog.splice(idx, 1);
-                    renderLog();
+                    }).catch(e => console.error('Delete failed:', e));
                 }
-            } catch (e) {
-                console.error('Failed to delete point:', e);
-            }
+            }).catch(e => console.error('Fetch for delete failed:', e));
         }
-
-        isSaving = false;
     }
 
     // ─── Restore state on reload ──────────────────────────────
