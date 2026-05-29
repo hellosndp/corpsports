@@ -646,6 +646,9 @@
                 body: { status: 'live', scorer_id: currentScorer?.id || null }
             });
 
+            // Restore state on reload
+            await loadExistingPoints();
+
             document.getElementById('loadingState').style.display = 'none';
             const main = document.getElementById('mainContent');
             main.style.display = 'flex';
@@ -656,10 +659,50 @@
         }
     }
 
-    // ─── Scoring ─────────────────────────────────────────────
+    // ─── Restore state on reload ──────────────────────────────
+    async function loadExistingPoints() {
+        try {
+            const pts = await sbFetch(`tabletennis_points?match_id=eq.${matchId}&order=last_updated.asc&select=*`);
+            if (!pts || !pts.length) return;
+            const ppSet = match.points_per_set || 21;
+            const setNums = [...new Set(pts.map(p => p.set_number))].sort((a,b) => a-b);
+            setNums.forEach(sn => {
+                const setPts = pts.filter(p => p.set_number === sn);
+                const pA = setPts.filter(p => p.winning_team_id === teamA.id).length;
+                const pB = setPts.filter(p => p.winning_team_id === teamB.id).length;
+                if (pA >= ppSet || pB >= ppSet) {
+                    const winner = pA >= ppSet ? 'A' : 'B';
+                    completedSets.push({ a: pA, b: pB, winner });
+                    setsWon[winner]++;
+                    currentSet = sn + 1;
+                } else {
+                    currentSet = sn;
+                    scores.A = pA;
+                    scores.B = pB;
+                    pointLog = [...setPts].reverse().map(p => ({
+                        team: p.winning_team_id === teamA.id ? 'A' : 'B',
+                        scoreA: 0, scoreB: 0,
+                        time: new Date(p.last_updated).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                        set: sn
+                    }));
+                }
+            });
+            const lastSetPts = pts.filter(p => p.set_number === Math.max(...setNums));
+            const lastA = lastSetPts.filter(p => p.winning_team_id === teamA.id).length;
+            const lastB = lastSetPts.filter(p => p.winning_team_id === teamB.id).length;
+            if (lastA >= ppSet || lastB >= ppSet) { scores.A = 0; scores.B = 0; pointLog = []; }
+            document.getElementById('scoreA').textContent = scores.A;
+            document.getElementById('scoreB').textContent = scores.B;
+            document.getElementById('setLabel').textContent = `Set #${currentSet}`;
+            document.getElementById('logSetLabel').textContent = `Set ${currentSet}`;
+            renderSetsBar(); renderSetsWonDots(); renderLog();
+        } catch(e) { console.error('Failed to restore state:', e); }
+    }
+
+        // ─── Scoring ─────────────────────────────────────────────
     async function adjustScore(team, delta) {
         if (delta < 0 && scores[team] <= 0) return;
-        if (isSaving) return;
+        if (delta > 0 && isSaving) return;
 
         scores[team] += delta;
         document.getElementById('score' + team).textContent = scores[team];
@@ -697,10 +740,24 @@
                 triggerSetWinnerPopup(team);
             }
         } else {
-            if (pointLog.length > 0 && pointLog[0].team === team) {
-                pointLog.shift();
-                renderLog();
-            }
+            // Minus: update UI immediately, delete from DB in background
+            scores[team]--;
+            document.getElementById('score' + team).textContent = scores[team];
+            const idx = pointLog.findIndex(e => e.team === team);
+            if (idx !== -1) pointLog.splice(idx, 1);
+            renderLog();
+
+            // Fire-and-forget delete
+            sbFetch(
+                `tabletennis_points?match_id=eq.${matchId}&set_number=eq.${currentSet}&winning_team_id=eq.${team === 'A' ? teamA.id : teamB.id}&order=last_updated.desc&limit=1&select=point_id`
+            ).then(latest => {
+                if (latest && latest.length > 0) {
+                    sbFetch(`tabletennis_points?point_id=eq.${latest[0].point_id}`, {
+                        method: 'DELETE',
+                        extraHeaders: { 'Prefer': 'return=minimal' }
+                    }).catch(e => console.error('Delete failed:', e));
+                }
+            }).catch(e => console.error('Fetch for delete failed:', e));
         }
     }
 
