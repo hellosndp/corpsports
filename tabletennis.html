@@ -614,7 +614,7 @@
         if (!matchId) return showFatalError('No match ID provided.');
         try {
             const matches = await sbFetch(
-                `matches?match_id=eq.${matchId}&select=*,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name)&limit=1`
+                `matches?match_id=eq.${matchId}&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name)&limit=1`
             );
             if (!matches || !matches.length) return showFatalError('Match not found.');
             match = matches[0];
