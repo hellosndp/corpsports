@@ -9,7 +9,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
+            background: #f5f5f5;
             padding-bottom: 120px;
         }
 
@@ -21,7 +21,7 @@
         }
 
         .header {
-            background-color: #1a73e8;
+            background: #1a73e8;
             color: white;
             padding: 16px 20px;
             font-size: 18px;
@@ -33,54 +33,91 @@
 
         .header-refresh { font-size: 12px; opacity: 0.8; font-weight: 400; }
 
-        .filter-tabs {
+        /* ── Sport Tabs ── */
+        .sport-tabs {
             display: flex;
-            gap: 10px;
-            padding: 14px 16px;
+            gap: 8px;
+            padding: 12px 16px;
             overflow-x: auto;
             border-bottom: 1px solid #e0e0e0;
+            background: white;
         }
 
-        .filter-tabs::-webkit-scrollbar { display: none; }
+        .sport-tabs::-webkit-scrollbar { display: none; }
 
-        .tab {
+        .sport-tab {
             padding: 7px 14px;
             border-radius: 20px;
-            background: transparent;
-            color: #5f6368;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
-            border: 1px solid #e0e0e0;
+            border: 1.5px solid #e0e0e0;
+            color: #5f6368;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .sport-tab.active { background: #1a73e8; color: white; border-color: #1a73e8; }
+        .sport-tab.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+        /* ── View Toggle (Matches / Tournament Path) ── */
+        .view-toggle {
+            display: flex;
+            margin: 12px 16px;
+            background: #f1f3f4;
+            border-radius: 10px;
+            padding: 3px;
+        }
+
+        .view-btn {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #5f6368;
+            border-radius: 8px;
+            cursor: pointer;
             transition: all 0.2s;
         }
 
-        .tab.active { background: #1a73e8; color: white; border-color: #1a73e8; }
-
-        .fixtures-content {
-            padding: 0;
+        .view-btn.active {
+            background: white;
+            color: #1a73e8;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
         }
 
-        .date-section { margin-bottom: 4px; }
-
-        .date-header {
-            padding: 14px 20px 10px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #202124;
-            background: #f8f9fa;
-            border-bottom: 1px solid #f0f0f0;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+        /* ── Stage Tabs (inside Matches view) ── */
+        .stage-tabs {
+            display: flex;
+            gap: 6px;
+            padding: 0 16px 12px;
+            overflow-x: auto;
         }
 
-        /* Match Card */
+        .stage-tabs::-webkit-scrollbar { display: none; }
+
+        .stage-tab {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1.5px solid #e0e0e0;
+            color: #5f6368;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .stage-tab.active { background: #1a73e8; color: white; border-color: #1a73e8; }
+        .stage-tab.has-live { border-color: #ea4335; color: #ea4335; }
+        .stage-tab.has-live.active { background: #ea4335; color: white; border-color: #ea4335; }
+
+        /* ── Match Card ── */
         .match-card {
-            margin: 10px 16px;
+            margin: 8px 16px;
             padding: 14px 16px;
             background: white;
             border: 1px solid #e0e0e0;
@@ -89,12 +126,8 @@
             transition: all 0.2s;
         }
 
-        .match-card.live-card {
-            border-color: #ea4335;
-            background: #fffafa;
-        }
-
-        .match-card.completed-card { opacity: 0.8; }
+        .match-card.live-card { border-color: #ea4335; background: #fffafa; cursor: pointer; }
+        .match-card.completed-card { opacity: 0.85; }
 
         .match-card-top {
             display: flex;
@@ -103,14 +136,10 @@
             margin-bottom: 10px;
         }
 
-        .sport-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            background: #e8f0fe;
-            color: #1a73e8;
+        .match-num {
             font-size: 11px;
             font-weight: 700;
-            border-radius: 12px;
+            color: #9e9e9e;
             text-transform: uppercase;
         }
 
@@ -129,8 +158,7 @@
         .status-completed { background: #e6f4ea; color: #34a853; }
 
         .live-pulse {
-            width: 7px;
-            height: 7px;
+            width: 7px; height: 7px;
             background: #ea4335;
             border-radius: 50%;
             animation: pulse 1.5s infinite;
@@ -145,16 +173,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 4px 0;
+            padding: 3px 0;
         }
 
         .match-team-name { font-size: 14px; font-weight: 500; color: #202124; }
-
-        .match-team-score {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
+        .match-team-name.tbd { color: #9e9e9e; font-style: italic; }
+        .match-team-score { font-size: 15px; font-weight: 700; }
         .score-a { color: #1a73e8; }
         .score-b { color: #ea4335; }
 
@@ -165,26 +189,110 @@
             margin-top: 8px;
             padding-top: 8px;
             border-top: 1px solid #f0f0f0;
-            font-size: 12px;
+        }
+
+        .match-result { font-size: 12px; font-weight: 600; color: #34a853; }
+        .set-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+        .set-chip { font-size: 11px; padding: 2px 8px; border-radius: 8px; font-weight: 600; }
+
+        /* ── Tournament Path ── */
+        .path-section { padding: 0 0 8px; }
+
+        .path-round-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px 10px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .path-round-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .path-round-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #202124;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .path-round-badge {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .path-match {
+            margin: 8px 16px;
+            padding: 12px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .path-match:hover { border-color: #1a73e8; box-shadow: 0 1px 6px rgba(26,115,232,0.1); }
+        .path-match.live { border-color: #ea4335; background: #fffafa; }
+        .path-match.done { opacity: 0.85; }
+        .path-match.tbd-match { background: #fafafa; }
+
+        .path-match-num {
+            font-size: 10px;
+            font-weight: 700;
+            color: #9e9e9e;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .path-match-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+        }
+
+        .path-team { font-size: 14px; font-weight: 500; color: #202124; }
+        .path-team.tbd { color: #bdbdbd; font-style: italic; font-size: 13px; }
+        .path-team.winner { color: #1a73e8; font-weight: 700; }
+
+        .path-score { font-size: 14px; font-weight: 700; }
+        .path-score-a { color: #1a73e8; }
+        .path-score-b { color: #ea4335; }
+
+        .path-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+        }
+
+        .path-connector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 16px 4px 30px;
+            font-size: 11px;
             color: #9e9e9e;
         }
 
-        .match-result {
-            font-size: 12px;
-            font-weight: 600;
-            color: #34a853;
+        .path-connector-line {
+            width: 20px;
+            height: 1px;
+            background: #e0e0e0;
         }
 
-        .set-score-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-
-        .set-chip {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        /* Empty / Loading */
+        /* Empty */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -200,6 +308,13 @@
         }
 
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .no-sport {
+            text-align: center;
+            padding: 48px 20px;
+            color: #9e9e9e;
+            font-size: 14px;
+        }
 
         /* Bottom Nav */
         .bottom-nav {
@@ -218,19 +333,10 @@
             width: calc(100% - 40px);
         }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex: 1;
-        }
-
-        .nav-icon { width: 24px; height: 24px; color: #5f6368; transition: all 0.2s; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.2s; flex: 1; }
+        .nav-icon { width: 24px; height: 24px; color: #5f6368; }
         .nav-item.active .nav-icon { color: #1a73e8; }
-        .nav-label { font-size: 11px; font-weight: 500; color: #5f6368; transition: all 0.2s; }
+        .nav-label { font-size: 11px; font-weight: 500; color: #5f6368; }
         .nav-item.active .nav-label { color: #1a73e8; font-weight: 600; }
         .nav-item:hover .nav-icon, .nav-item:hover .nav-label { color: #1a73e8; }
     </style>
@@ -242,11 +348,25 @@
         <span class="header-refresh" id="lastUpdated"></span>
     </div>
 
-    <div class="filter-tabs" id="filterTabs">
-        <div class="tab active" data-sport="all">#All</div>
+    <!-- Sport Tabs -->
+    <div class="sport-tabs" id="sportTabs">
+        <div class="skeleton" style="width:80px;height:34px;border-radius:20px;flex-shrink:0;"></div>
+        <div class="skeleton" style="width:80px;height:34px;border-radius:20px;flex-shrink:0;"></div>
     </div>
 
-    <div class="fixtures-content" id="fixturesContent">
+    <!-- View Toggle -->
+    <div class="view-toggle" id="viewToggle" style="display:none">
+        <div class="view-btn active" id="btnMatches" onclick="switchView('matches')">Matches</div>
+        <div class="view-btn" id="btnPath" onclick="switchView('path')">Tournament Path</div>
+    </div>
+
+    <!-- Stage Tabs (Matches view only) -->
+    <div id="stageTabs" style="display:none">
+        <div class="stage-tabs" id="stageTabsInner"></div>
+    </div>
+
+    <!-- Content -->
+    <div id="mainContent">
         <div style="padding:16px;">
             <div class="skeleton" style="height:90px;margin-bottom:10px;border-radius:12px;"></div>
             <div class="skeleton" style="height:90px;margin-bottom:10px;border-radius:12px;"></div>
@@ -270,7 +390,7 @@
         <span class="nav-label">Leaderboard</span>
     </div>
     <div class="nav-item" onclick="navigate('stats')">
-        <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-02-2z"/></svg>
         <span class="nav-label">Stats</span>
     </div>
 </div>
@@ -295,26 +415,39 @@
         '8-ball pool':  'pool_points'
     };
 
-    let allMatches  = [];
-    let activeSport = 'all';
+    const ALL_SPORTS  = ['Badminton','Table Tennis','Volleyball','Carrom','8-Ball Pool'];
+    const ROUND_ORDER = ['GS1','GS2','QF','QR','ER','FINAL'];
+    const ROUND_LABELS = {
+        GS1: 'Group Stage 1', GS2: 'Group Stage 2',
+        QF: 'Quarter Finals', QR: 'Qualifier Round',
+        ER: 'Eliminator Round', FINAL: 'Final'
+    };
+    const ROUND_COLORS = {
+        GS1: '#1a73e8', GS2: '#34a853', QF: '#f9a825',
+        QR: '#9c27b0', ER: '#ea4335', FINAL: '#e65100'
+    };
 
-    // ─── Fetch all matches ────────────────────────────────────
-    async function fetchMatches() {
-        // Fetch matches without embedded joins to avoid FK ambiguity
-        const matches = await sbFetch(`matches?order=scheduled_time.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number`);
-        if (!matches || !matches.length) { allMatches = []; return; }
+    // ── State ──────────────────────────────────────────────────
+    let allMatches   = [];
+    let teamMap      = {};
+    let sportMap     = {};
+    let activeSport  = null;  // sport_id
+    let activeSportName = null;
+    let activeView   = 'matches'; // 'matches' | 'path'
+    let activeStage  = 'GS1';
 
-        // Fetch all teams and sports once
-        const [teams, sports] = await Promise.all([
+    // ── Fetch ──────────────────────────────────────────────────
+    async function fetchAll() {
+        const [matches, teams, sports] = await Promise.all([
+            sbFetch(`matches?order=match_number.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number`),
             sbFetch(`teams?select=team_id,team_name`),
             sbFetch(`sports?select=sport_id,sport_name`)
         ]);
 
-        const teamMap  = Object.fromEntries((teams  || []).map(t => [t.team_id,  t]));
-        const sportMap = Object.fromEntries((sports || []).map(s => [s.sport_id, s]));
+        teamMap  = Object.fromEntries((teams  || []).map(t => [t.team_id,  t]));
+        sportMap = Object.fromEntries((sports || []).map(s => [s.sport_id, s]));
 
-        // Enrich matches with team/sport names
-        allMatches = matches.map(m => ({
+        allMatches = (matches || []).map(m => ({
             ...m,
             team1:  teamMap[m.team1_id]  || null,
             team2:  teamMap[m.team2_id]  || null,
@@ -322,222 +455,361 @@
             winner: teamMap[m.winner_team_id] || null
         }));
 
-        // Enrich live + completed matches with set scores
-        const enriched = allMatches.filter(m => m.status === 'live' || m.status === 'completed');
-        await Promise.all(enriched.map(enrichMatchScores));
+        // Enrich live/completed with scores
+        const toEnrich = allMatches.filter(m => m.status === 'live' || m.status === 'completed');
+        await Promise.all(toEnrich.map(enrichMatchScores));
     }
 
     async function enrichMatchScores(m) {
         const sport = (m.sport?.sport_name || '').toLowerCase();
         const table = SPORT_TABLES[sport];
         if (!table) return;
-
         try {
             const isSetBased = table === 'carrom_points' || table === 'pool_points';
-
             if (isSetBased) {
                 const pts = await sbFetch(`${table}?match_id=eq.${m.match_id}&select=set_number,winner_team_id,points&order=set_number.asc`);
-                m._sets = (pts || []).map(p => ({
-                    set:     p.set_number,
-                    winner:  p.winner_team_id === m.team1_id ? 'A' : 'B',
-                    points:  p.points
-                }));
-                m._setsA = m._sets.filter(s => s.winner === 'A').length;
-                m._setsB = m._sets.filter(s => s.winner === 'B').length;
+                m._setsA = (pts || []).filter(p => p.winner_team_id === m.team1_id).length;
+                m._setsB = (pts || []).filter(p => p.winner_team_id === m.team2_id).length;
+                m._sets  = (pts || []).map(p => ({ set: p.set_number, winner: p.winner_team_id === m.team1_id ? 'A' : 'B', points: p.points }));
             } else {
-                // Point-by-point sports: count per set
                 const pts = await sbFetch(`${table}?match_id=eq.${m.match_id}&select=set_number,winning_team_id&order=set_number.asc`);
                 if (!pts || !pts.length) { m._setsA = 0; m._setsB = 0; return; }
-
                 const setNums = [...new Set(pts.map(p => p.set_number))].sort();
                 m._sets = setNums.map(sn => {
-                    const spts = pts.filter(p => p.set_number === sn);
-                    const pA   = spts.filter(p => p.winning_team_id === m.team1_id).length;
-                    const pB   = spts.filter(p => p.winning_team_id === m.team2_id).length;
-                    return { set: sn, scoreA: pA, scoreB: pB };
+                    const sp = pts.filter(p => p.set_number === sn);
+                    return { set: sn, scoreA: sp.filter(p => p.winning_team_id === m.team1_id).length, scoreB: sp.filter(p => p.winning_team_id === m.team2_id).length };
                 });
-
-                const maxSet  = Math.max(...pts.map(p => p.set_number));
-                const curPts  = pts.filter(p => p.set_number === maxSet);
-                m._currentSet = maxSet;
-                m._scoreA     = curPts.filter(p => p.winning_team_id === m.team1_id).length;
-                m._scoreB     = curPts.filter(p => p.winning_team_id === m.team2_id).length;
-
-                // Sets won = sets where one team reached points_per_set
+                const maxSet = Math.max(...setNums);
+                const cur = pts.filter(p => p.set_number === maxSet);
+                m._scoreA = cur.filter(p => p.winning_team_id === m.team1_id).length;
+                m._scoreB = cur.filter(p => p.winning_team_id === m.team2_id).length;
                 m._setsA = 0; m._setsB = 0;
                 m._sets.forEach(s => {
                     if (s.scoreA >= (m.points_per_set || 21)) m._setsA++;
                     else if (s.scoreB >= (m.points_per_set || 21)) m._setsB++;
                 });
             }
-        } catch (e) {
-            console.error('Enrich error:', e);
+        } catch(e) { console.error('Enrich error', e); }
+    }
+
+    // ── Sport Tabs ─────────────────────────────────────────────
+    function renderSportTabs() {
+        const container = document.getElementById('sportTabs');
+        const sportsWithMatches = new Set(allMatches.map(m => m.sport?.sport_name).filter(Boolean));
+
+        container.innerHTML = ALL_SPORTS.map(s => {
+            const hasMatches = sportsWithMatches.has(s);
+            const sport = Object.values(sportMap).find(sp => sp.sport_name === s);
+            const sid   = sport?.sport_id || '';
+            const cls   = hasMatches ? (activeSportName === s ? 'sport-tab active' : 'sport-tab') : 'sport-tab disabled';
+            return `<div class="${cls}" data-sport-id="${sid}" data-sport-name="${s}" onclick="selectSport('${sid}','${s}')">${s}</div>`;
+        }).join('');
+
+        // Auto-select first sport with matches if none selected
+        if (!activeSport && sportsWithMatches.size > 0) {
+            const first = ALL_SPORTS.find(s => sportsWithMatches.has(s));
+            if (first) {
+                const sport = Object.values(sportMap).find(sp => sp.sport_name === first);
+                if (sport) selectSport(sport.sport_id, first, false);
+            }
         }
     }
 
-    // ─── Render ───────────────────────────────────────────────
-    function getFiltered() {
-        if (activeSport === 'all') return allMatches;
-        return allMatches.filter(m =>
-            (m.sport?.sport_name || '').toLowerCase().includes(activeSport.toLowerCase())
-        );
+    function selectSport(sportId, sportName, rerender = true) {
+        activeSport     = sportId;
+        activeSportName = sportName;
+        document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
+        const tab = document.querySelector(`[data-sport-id="${sportId}"]`);
+        if (tab) tab.classList.add('active');
+        document.getElementById('viewToggle').style.display = 'flex';
+        if (rerender) render();
     }
 
-    function groupByDate(matches) {
-        const groups = {};
-        matches.forEach(m => {
-            const d   = m.scheduled_time ? new Date(m.scheduled_time) : null;
-            const key = d ? d.toDateString() : 'Unscheduled';
-            if (!groups[key]) groups[key] = [];
-            groups[key].push(m);
-        });
-        return groups;
+    // ── View Toggle ────────────────────────────────────────────
+    function switchView(view) {
+        activeView = view;
+        document.getElementById('btnMatches').classList.toggle('active', view === 'matches');
+        document.getElementById('btnPath').classList.toggle('active', view === 'path');
+        document.getElementById('stageTabs').style.display = view === 'matches' ? 'block' : 'none';
+        renderContent();
     }
 
-    function formatDateHeader(dateStr) {
-        if (dateStr === 'Unscheduled') return 'Unscheduled';
-        const d     = new Date(dateStr);
-        const today = new Date();
-        const tmrw  = new Date(today); tmrw.setDate(today.getDate() + 1);
-        const yest  = new Date(today); yest.setDate(today.getDate() - 1);
-        if (d.toDateString() === today.toDateString()) return 'Today';
-        if (d.toDateString() === tmrw.toDateString())  return 'Tomorrow';
-        if (d.toDateString() === yest.toDateString())  return 'Yesterday';
-        return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-    }
+    // ── Stage Tabs ─────────────────────────────────────────────
+    function renderStageTabs() {
+        const sportMatches = allMatches.filter(m => m.sport_id === activeSport);
+        const rounds = [...new Set(sportMatches.map(m => m.round).filter(Boolean))];
+        const ordered = ROUND_ORDER.filter(r => rounds.includes(r));
 
-    function renderSetChips(m) {
-        if (!m._sets || !m._sets.length) return '';
-        const isSetBased = !m._sets[0].scoreA && m._sets[0].scoreA !== 0;
+        if (!ordered.length) { document.getElementById('stageTabs').style.display = 'none'; return; }
+        document.getElementById('stageTabs').style.display = 'block';
 
-        return `<div class="set-score-chips">` +
-            m._sets.map((s, i) => {
-                const label = isSetBased
-                    ? `S${s.set}: ${s.winner === 'A' ? '✓' : ''}${s.points || 0}`
-                    : `S${s.set}: ${s.scoreA}–${s.scoreB}`;
-                const aWon  = isSetBased ? s.winner === 'A' : s.scoreA >= (m.points_per_set || 21);
-                const color = aWon ? '#1a73e8' : '#ea4335';
-                return `<span class="set-chip" style="background:${color}15;color:${color}">${label}</span>`;
-            }).join('') + `</div>`;
-    }
+        const inner = document.getElementById('stageTabsInner');
+        inner.innerHTML = ordered.map(r => {
+            const hasLive = sportMatches.some(m => m.round === r && m.status === 'live');
+            const isActive = activeStage === r;
+            let cls = 'stage-tab';
+            if (isActive) cls += ' active';
+            else if (hasLive) cls += ' has-live';
+            return `<div class="${cls}" onclick="selectStage('${r}')">${ROUND_LABELS[r]}</div>`;
+        }).join('');
 
-    function buildMatchCard(m) {
-        const sport    = m.sport?.sport_name || '—';
-        const team1    = m.team1?.team_name || '—';
-        const team2    = m.team2?.team_name || '—';
-        const isLive   = m.status === 'live';
-        const isDone   = m.status === 'completed';
-        const time     = m.scheduled_time
-            ? new Date(m.scheduled_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-            : '';
-
-        let statusBadge = '';
-        if (isLive)  statusBadge = `<span class="status-badge status-live"><span class="live-pulse"></span>LIVE</span>`;
-        else if (isDone) statusBadge = `<span class="status-badge status-completed">✓ Done</span>`;
-        else statusBadge = `<span class="status-badge status-scheduled">${time}</span>`;
-
-        // Scores
-        let score1 = '', score2 = '';
-        if (isLive && m._scoreA !== undefined) {
-            score1 = `<span class="match-team-score score-a">${m._scoreA}</span>`;
-            score2 = `<span class="match-team-score score-b">${m._scoreB}</span>`;
+        // Auto-select first stage if current not in list
+        if (!ordered.includes(activeStage)) {
+            activeStage = ordered[0];
+            inner.querySelectorAll('.stage-tab')[0]?.classList.add('active');
         }
-        if (isDone && m._setsA !== undefined) {
-            score1 = `<span class="match-team-score score-a">${m._setsA}</span>`;
-            score2 = `<span class="match-team-score score-b">${m._setsB}</span>`;
-        }
-
-        const winnerTag = isDone && m.winner?.team_name
-            ? `<span class="match-result">🏆 ${m.winner.team_name}</span>`
-            : '';
-
-        const setChips = (isLive || isDone) ? renderSetChips(m) : '';
-
-        const clickHandler = isLive
-            ? `onclick="window.location.href='livescore.html?match_id=${m.match_id}'"`
-            : '';
-
-        return `
-            <div class="match-card ${isLive ? 'live-card' : ''} ${isDone ? 'completed-card' : ''}" ${clickHandler} style="${isLive ? 'cursor:pointer;' : ''}">
-                <div class="match-card-top">
-                    <span class="sport-badge">${sport}</span>
-                    ${statusBadge}
-                </div>
-                <div>
-                    <div class="match-team">
-                        <span class="match-team-name">${team1}</span>
-                        ${score1}
-                    </div>
-                    <div class="match-team">
-                        <span class="match-team-name">${team2}</span>
-                        ${score2}
-                    </div>
-                </div>
-                ${setChips || winnerTag ? `
-                <div class="match-footer">
-                    ${setChips}
-                    ${winnerTag}
-                </div>` : ''}
-            </div>`;
     }
 
-    function renderFixtures() {
-        const content  = document.getElementById('fixturesContent');
-        const filtered = getFiltered();
+    function selectStage(round) {
+        activeStage = round;
+        renderStageTabs();
+        renderMatchesView();
+    }
 
-        if (!filtered.length) {
-            content.innerHTML = '<div class="empty-state">No matches found</div>';
+    // ── Main render ────────────────────────────────────────────
+    function render() {
+        if (!activeSport) {
+            document.getElementById('mainContent').innerHTML = '<div class="no-sport">Select a sport above</div>';
+            return;
+        }
+        renderStageTabs();
+        renderContent();
+    }
+
+    function renderContent() {
+        if (activeView === 'matches') {
+            renderMatchesView();
+        } else {
+            renderPathView();
+        }
+    }
+
+    // ── Matches View ───────────────────────────────────────────
+    function renderMatchesView() {
+        const content = document.getElementById('mainContent');
+        const matches = allMatches.filter(m => m.sport_id === activeSport && m.round === activeStage);
+
+        if (!matches.length) {
+            content.innerHTML = `<div class="empty-state">No ${ROUND_LABELS[activeStage] || activeStage} matches yet</div>`;
             return;
         }
 
-        const groups = groupByDate(filtered);
-        content.innerHTML = Object.entries(groups).map(([dateStr, matches]) => `
-            <div class="date-section">
-                <div class="date-header">${formatDateHeader(dateStr)}</div>
-                ${matches.map(buildMatchCard).join('')}
-            </div>`
-        ).join('');
+        content.innerHTML = matches.map(m => buildMatchCard(m)).join('');
     }
 
-    function renderSportTabs() {
-        const tabs   = document.getElementById('filterTabs');
-        const sports = [...new Set(allMatches.map(m => m.sport?.sport_name).filter(Boolean))];
-        tabs.innerHTML = `<div class="tab active" data-sport="all">#All</div>` +
-            sports.map(s => `<div class="tab" data-sport="${s.toLowerCase()}">#${s}</div>`).join('');
-        tabs.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                activeSport = tab.dataset.sport;
-                renderFixtures();
-            });
+    function buildMatchCard(m) {
+        const isLive = m.status === 'live';
+        const isDone = m.status === 'completed';
+        const isWalkover = m.status === 'walkover';
+
+        const team1Name = m.team1?.team_name || (m.match_number ? `TBD (${getParentRef(m, 'team1')})` : 'TBD');
+        const team2Name = m.team2?.team_name || (m.match_number ? `TBD (${getParentRef(m, 'team2')})` : 'TBD');
+        const isTBD1 = !m.team1?.team_name;
+        const isTBD2 = !m.team2?.team_name;
+
+        const time = m.scheduled_time
+            ? new Date(m.scheduled_time).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+            : '';
+
+        let statusBadge = '';
+        if (isLive) statusBadge = `<span class="status-badge status-live"><span class="live-pulse"></span>LIVE</span>`;
+        else if (isDone) statusBadge = `<span class="status-badge status-completed">✓ Done</span>`;
+        else if (isWalkover) statusBadge = `<span class="status-badge status-completed">Walkover</span>`;
+        else statusBadge = `<span class="status-badge status-scheduled">${time || 'Scheduled'}</span>`;
+
+        let score1 = '', score2 = '';
+        if ((isLive || isDone) && m._scoreA !== undefined) {
+            score1 = `<span class="match-team-score score-a">${isLive ? m._scoreA : (m._setsA ?? '')}</span>`;
+            score2 = `<span class="match-team-score score-b">${isLive ? m._scoreB : (m._setsB ?? '')}</span>`;
+        }
+
+        const winnerTag = isDone && m.winner?.team_name
+            ? `<div class="match-footer"><span class="match-result">🏆 ${m.winner.team_name}</span>${renderSetChips(m)}</div>` : '';
+
+        const click = isLive ? `onclick="window.location.href='livescore.html?match_id=${m.match_id}'"` : '';
+
+        return `<div class="match-card ${isLive?'live-card':''} ${isDone?'completed-card':''}" ${click}>
+            <div class="match-card-top">
+                <span class="match-num">${m.match_number || ''}</span>
+                ${statusBadge}
+            </div>
+            <div class="match-team">
+                <span class="match-team-name ${isTBD1?'tbd':''}">${team1Name}</span>${score1}
+            </div>
+            <div class="match-team">
+                <span class="match-team-name ${isTBD2?'tbd':''}">${team2Name}</span>${score2}
+            </div>
+            ${winnerTag}
+        </div>`;
+    }
+
+    function renderSetChips(m) {
+        if (!m._sets?.length) return '';
+        return `<div class="set-chips">` + m._sets.map(s => {
+            const isSetBased = s.winner !== undefined && s.scoreA === undefined;
+            const label = isSetBased ? `S${s.set}` : `S${s.set}: ${s.scoreA}–${s.scoreB}`;
+            const aWon  = isSetBased ? s.winner === 'A' : s.scoreA >= (m.points_per_set || 21);
+            const color = aWon ? '#1a73e8' : '#ea4335';
+            return `<span class="set-chip" style="background:${color}15;color:${color}">${label}</span>`;
+        }).join('') + `</div>`;
+    }
+
+    // ── Tournament Path View ───────────────────────────────────
+    function renderPathView() {
+        const content = document.getElementById('mainContent');
+        const sportMatches = allMatches.filter(m => m.sport_id === activeSport);
+        const rounds = ROUND_ORDER.filter(r => {
+            // Always show rounds that have matches OR that should exist based on progression
+            return sportMatches.some(m => m.round === r) || shouldShowRound(r, sportMatches);
         });
+
+        if (!rounds.length) {
+            content.innerHTML = '<div class="empty-state">No matches created yet for this sport</div>';
+            return;
+        }
+
+        content.innerHTML = rounds.map(r => renderPathRound(r, sportMatches)).join('');
     }
 
-    // ─── Main loop ────────────────────────────────────────────
+    function shouldShowRound(round, matches) {
+        // Show future rounds as placeholders if GS1 exists
+        const hasGS1 = matches.some(m => m.round === 'GS1');
+        if (!hasGS1) return false;
+        const roundIdx = ROUND_ORDER.indexOf(round);
+        const maxRound = Math.max(...matches.map(m => ROUND_ORDER.indexOf(m.round)).filter(i => i >= 0));
+        return roundIdx <= maxRound + 1; // show one round ahead
+    }
+
+    function renderPathRound(round, sportMatches) {
+        const matches  = sportMatches.filter(m => m.round === round);
+        const color    = ROUND_COLORS[round] || '#1a73e8';
+        const label    = ROUND_LABELS[round] || round;
+        const hasLive  = matches.some(m => m.status === 'live');
+        const allDone  = matches.length > 0 && matches.every(m => m.status === 'completed' || m.status === 'walkover');
+
+        let badgeHtml = '';
+        if (hasLive) badgeHtml = `<span class="path-round-badge" style="background:#fce8e6;color:#ea4335">● LIVE</span>`;
+        else if (allDone) badgeHtml = `<span class="path-round-badge" style="background:#e6f4ea;color:#34a853">✓ Done</span>`;
+        else if (!matches.length) badgeHtml = `<span class="path-round-badge" style="background:#f5f5f5;color:#9e9e9e">Upcoming</span>`;
+
+        const matchesHtml = matches.length
+            ? matches.map((m, i) => renderPathMatch(m, i, matches.length)).join('')
+            : renderPlaceholderMatch(round);
+
+        return `
+            <div class="path-section">
+                <div class="path-round-header">
+                    <div class="path-round-dot" style="background:${color}"></div>
+                    <span class="path-round-title">${label}</span>
+                    ${badgeHtml}
+                </div>
+                ${matchesHtml}
+            </div>`;
+    }
+
+    function renderPathMatch(m, idx, total) {
+        const isLive = m.status === 'live';
+        const isDone = m.status === 'completed' || m.status === 'walkover';
+        const isTBD1 = !m.team1?.team_name;
+        const isTBD2 = !m.team2?.team_name;
+
+        const t1 = m.team1?.team_name || `TBD (${getParentRef(m, 'team1')})`;
+        const t2 = m.team2?.team_name || (m.status === 'walkover' ? 'Walkover' : `TBD (${getParentRef(m, 'team2')})`);
+
+        const isW1 = isDone && m.winner_team_id === m.team1_id;
+        const isW2 = isDone && m.winner_team_id === m.team2_id;
+
+        let statusEl = '';
+        if (isLive) statusEl = `<span class="path-status"><span class="status-badge status-live" style="font-size:10px;padding:2px 8px;"><span class="live-pulse"></span>LIVE</span></span>`;
+        else if (isDone) statusEl = `<span class="path-status"><span class="status-badge status-completed" style="font-size:10px;padding:2px 8px;">✓</span></span>`;
+
+        let s1 = '', s2 = '';
+        if (isLive && m._scoreA !== undefined) {
+            s1 = `<span class="path-score path-score-a">${m._scoreA}</span>`;
+            s2 = `<span class="path-score path-score-b">${m._scoreB}</span>`;
+        }
+        if (isDone && m._setsA !== undefined) {
+            s1 = `<span class="path-score path-score-a">${m._setsA}</span>`;
+            s2 = `<span class="path-score path-score-b">${m._setsB}</span>`;
+        }
+
+        const click = isLive ? `onclick="window.location.href='livescore.html?match_id=${m.match_id}'"` : '';
+
+        const connector = idx < total - 1 ? `<div class="path-connector"><div class="path-connector-line"></div></div>` : '';
+
+        return `
+            <div class="path-match ${isLive?'live':''} ${isDone?'done':''} ${(!isLive&&!isDone)?'tbd-match':''}" ${click}>
+                <div class="path-match-num">${m.match_number || ''}</div>
+                <div class="path-match-row">
+                    <span class="path-team ${isTBD1?'tbd':''} ${isW1?'winner':''}">${t1}</span>${s1}
+                </div>
+                <div class="path-match-row">
+                    <span class="path-team ${isTBD2?'tbd':''} ${isW2?'winner':''}">${t2}</span>${s2}
+                </div>
+                ${statusEl}
+            </div>
+            ${connector}`;
+    }
+
+    function renderPlaceholderMatch(round) {
+        const refs = getRoundTBDRefs(round);
+        return `
+            <div class="path-match tbd-match">
+                <div class="path-match-num">Upcoming</div>
+                <div class="path-match-row"><span class="path-team tbd">${refs[0]}</span></div>
+                <div class="path-match-row"><span class="path-team tbd">${refs[1]}</span></div>
+            </div>`;
+    }
+
+    function getRoundTBDRefs(round) {
+        const refs = {
+            GS2:   ['Winner M1/M2', 'Winner M3/M4 ...'],
+            QF:    ['Winner GS2', 'Winner GS2'],
+            QR:    ['Winner QF', 'Winner QF'],
+            ER:    ['Loser from Q2 path', 'Loser from Q2 path'],
+            FINAL: ['Winner Qualifier Round', 'Winner Eliminator Round']
+        };
+        return refs[round] || ['TBD', 'TBD'];
+    }
+
+    function getParentRef(m, side) {
+        // Derive TBD label from match_number pattern
+        const mn = m.match_number || '';
+        const parentRefs = {
+            'M11': ['M1', 'M2'], 'M12': ['M3', 'M4'], 'M13': ['M5', 'M6'],
+            'M14': ['M7', 'M8'], 'M15': ['M9', 'M10'],
+            'M16': ['M11', 'M12'], 'M17': ['M13', 'M14'], 'M18': ['M15', '—'],
+            'Q1':  ['M16', 'M17'], 'Q2':  ['Q1', 'M18'],
+            'E1':  ['GS1 loser', 'GS2 loser'],
+            'E2':  ['E1 winner', 'QF loser'],
+            'E3':  ['E2 winner', 'Q1 loser'],
+            'FINAL': ['Q2 winner', 'E3 winner']
+        };
+        const pair = parentRefs[mn];
+        if (!pair) return 'TBD';
+        return `W:${side === 'team1' ? pair[0] : pair[1]}`;
+    }
+
+    // ── Main loop ──────────────────────────────────────────────
     async function refresh() {
         try {
-            await fetchMatches();
+            await fetchAll();
             renderSportTabs();
-            renderFixtures();
+            render();
             document.getElementById('lastUpdated').textContent =
                 '↻ ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        } catch (e) {
+        } catch(e) {
             console.error('Refresh error:', e);
         }
     }
 
     function navigate(page) {
-        const urls = {
-            home: './home.html', fixtures: './fixtures.html',
-            leaderboard: './leaderboard.html', stats: './stats.html'
-        };
+        const urls = { home: './home.html', fixtures: './fixtures.html', leaderboard: './leaderboard.html', stats: './stats.html' };
         if (event) { event.preventDefault(); event.stopPropagation(); }
         window.location.href = urls[page];
     }
 
     refresh();
-    // Poll every 10 seconds for live score updates
     setInterval(refresh, 10000);
 </script>
 </body>
