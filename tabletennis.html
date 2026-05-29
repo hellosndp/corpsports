@@ -428,7 +428,25 @@
 
         .result-row .label { color: #5f6368; }
     </style>
-    <script src="auth.js"></script>
+    <script>
+        function getScorer() {
+            return {
+                id:       sessionStorage.getItem('scorer_id'),
+                name:     sessionStorage.getItem('scorer_name'),
+                username: sessionStorage.getItem('scorer_user')
+            };
+        }
+        function requireAuth() {
+            const s = getScorer();
+            if (!s.id) { window.location.href = 'login.html'; return null; }
+            return s;
+        }
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="progression.js"></script>
 </head>
 <body>
 <div class="app">
@@ -774,6 +792,7 @@
                 body: { status: 'completed', winner_team_id: winnerId, scorer_id: currentScorer?.id || null }
             });
             document.getElementById('completionSubtitle').textContent = 'Result saved! Redirecting...';
+            if (winnerId) { await runProgression(matchId, winnerId, currentScorer?.id || null); }
             setTimeout(() => { window.location.href = 'admin.html'; }, 2000);
         } catch (e) {
             document.getElementById('completionSubtitle').textContent = 'Error saving: ' + e.message;
