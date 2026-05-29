@@ -382,7 +382,11 @@
         const matches = await sbFetch(
             `matches?scheduled_time=gte.${todayStart}&scheduled_time=lt.${todayEnd}` +
             `&order=scheduled_time.asc` +
-            `&select=*,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name),sport:sports(sport_name),winner:teams!matches_winner_team_id_fkey(team_name)`
+            `&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,` +
+            `team1:teams!matches_team1_id_fkey(team_id,team_name),` +
+            `team2:teams!matches_team2_id_fkey(team_id,team_name),` +
+            `sport:sports(sport_name),` +
+            `winner:teams!matches_winner_team_id_fkey(team_name)`
         );
 
         allMatches      = matches || [];
