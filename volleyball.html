@@ -614,13 +614,18 @@
         if (!matchId) return showFatalError('No match ID provided.');
         try {
             const matches = await sbFetch(
-                `matches?match_id=eq.${matchId}&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name)&limit=1`
+                `matches?match_id=eq.${matchId}&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number&limit=1`
             );
             if (!matches || !matches.length) return showFatalError('Match not found.');
             match = matches[0];
 
-            teamA = { id: match.team1.team_id, name: match.team1.team_name };
-            teamB = { id: match.team2.team_id, name: match.team2.team_name };
+            // Fetch team names separately
+            const [_t1, _t2] = await Promise.all([
+                sbFetch(`teams?team_id=eq.${match.team1_id}&select=team_id,team_name&limit=1`),
+                sbFetch(`teams?team_id=eq.${match.team2_id}&select=team_id,team_name&limit=1`)
+            ]);
+            teamA = { id: match.team1_id, name: _t1?.[0]?.team_name || '?' };
+            teamB = { id: match.team2_id, name: _t2?.[0]?.team_name || '?' };
 
             document.getElementById('teamAName').textContent = teamA.name;
             document.getElementById('teamBName').textContent = teamB.name;

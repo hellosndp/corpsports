@@ -786,9 +786,24 @@
         async function loadMatches() {
             try {
                 const matches = await sbFetch(
-                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name),sport:sports(sport_name),winner:teams!matches_winner_team_id_fkey(team_name)`
+                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number`
                 );
-                matchesList = matches || [];
+                if (!matches || !matches.length) { matchesList = []; renderMatches(); return; }
+
+                const [teams, sports] = await Promise.all([
+                    sbFetch(`teams?select=team_id,team_name`),
+                    sbFetch(`sports?select=sport_id,sport_name`)
+                ]);
+                const teamMap  = Object.fromEntries((teams  || []).map(t => [t.team_id,  t]));
+                const sportMap = Object.fromEntries((sports || []).map(s => [s.sport_id, s]));
+
+                matchesList = matches.map(m => ({
+                    ...m,
+                    team1:  teamMap[m.team1_id]  || null,
+                    team2:  teamMap[m.team2_id]  || null,
+                    sport:  sportMap[m.sport_id] || null,
+                    winner: teamMap[m.winner_team_id] || null
+                }));
                 renderMatches();
             } catch (e) {
                 console.error('Failed to load matches:', e);

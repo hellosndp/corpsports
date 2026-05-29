@@ -300,10 +300,27 @@
 
     // ─── Fetch all matches ────────────────────────────────────
     async function fetchMatches() {
-        const matches = await sbFetch(
-            `matches?order=scheduled_time.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name),sport:sports(sport_name),winner:teams!matches_winner_team_id_fkey(team_name)`
-        );
-        allMatches = matches || [];
+        // Fetch matches without embedded joins to avoid FK ambiguity
+        const matches = await sbFetch(`matches?order=scheduled_time.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number`);
+        if (!matches || !matches.length) { allMatches = []; return; }
+
+        // Fetch all teams and sports once
+        const [teams, sports] = await Promise.all([
+            sbFetch(`teams?select=team_id,team_name`),
+            sbFetch(`sports?select=sport_id,sport_name`)
+        ]);
+
+        const teamMap  = Object.fromEntries((teams  || []).map(t => [t.team_id,  t]));
+        const sportMap = Object.fromEntries((sports || []).map(s => [s.sport_id, s]));
+
+        // Enrich matches with team/sport names
+        allMatches = matches.map(m => ({
+            ...m,
+            team1:  teamMap[m.team1_id]  || null,
+            team2:  teamMap[m.team2_id]  || null,
+            sport:  sportMap[m.sport_id] || null,
+            winner: teamMap[m.winner_team_id] || null
+        }));
 
         // Enrich live + completed matches with set scores
         const enriched = allMatches.filter(m => m.status === 'live' || m.status === 'completed');
