@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badminton Scorer</title>
+    <title>Table Tennis Scorer</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -455,7 +455,7 @@
     <div class="header">
         <div class="header-top">
             <button class="back-btn" onclick="history.back()">←</button>
-            <div class="match-title" id="matchTitle">Badminton</div>
+            <div class="match-title" id="matchTitle">Table Tennis</div>
             <div style="width:32px"></div>
         </div>
         <div class="header-meta">
@@ -641,9 +641,6 @@
                 body: { status: 'live', scorer_id: currentScorer?.id || null }
             });
 
-            // Restore state if page was reloaded
-            await loadExistingPoints();
-
             document.getElementById('loadingState').style.display = 'none';
             const main = document.getElementById('mainContent');
             main.style.display = 'flex';
@@ -657,16 +654,15 @@
     // ─── Scoring ─────────────────────────────────────────────
     async function adjustScore(team, delta) {
         if (delta < 0 && scores[team] <= 0) return;
-        if (delta > 0 && isSaving) return; // prevent rapid double-tap on +
+        if (isSaving) return;
+
+        scores[team] += delta;
+        document.getElementById('score' + team).textContent = scores[team];
 
         if (delta > 0) {
             isSaving = true;
-            // Update UI immediately
-            scores[team]++;
-            document.getElementById('score' + team).textContent = scores[team];
-
             try {
-                await sbFetch('badminton_points', {
+                await sbFetch('tabletennis_points', {
                     method: 'POST',
                     extraHeaders: { 'Prefer': 'return=minimal' },
                     body: {
@@ -678,13 +674,9 @@
                     }
                 });
             } catch (e) {
-                // Rollback UI on failure
-                scores[team]--;
-                document.getElementById('score' + team).textContent = scores[team];
                 console.error('Failed to save point:', e);
-                isSaving = false;
-                return;
             }
+            isSaving = false;
 
             pointLog.unshift({
                 team,
@@ -694,98 +686,16 @@
                 set: currentSet
             });
             renderLog();
-            isSaving = false;
 
-            // Trigger set winner popup if max points reached
+            // Set won when a team reaches points_per_set
             if (scores[team] >= match.points_per_set) {
                 triggerSetWinnerPopup(team);
             }
-
         } else {
-            // Minus: update UI immediately, delete from DB in background
-            scores[team]--;
-            document.getElementById('score' + team).textContent = scores[team];
-            const idx = pointLog.findIndex(e => e.team === team);
-            if (idx !== -1) pointLog.splice(idx, 1);
-            renderLog();
-
-            // Fire-and-forget delete
-            sbFetch(
-                `badminton_points?match_id=eq.${matchId}&set_number=eq.${currentSet}&winning_team_id=eq.${team === 'A' ? teamA.id : teamB.id}&order=last_updated.desc&limit=1&select=point_id`
-            ).then(latest => {
-                if (latest && latest.length > 0) {
-                    sbFetch(`badminton_points?point_id=eq.${latest[0].point_id}`, {
-                        method: 'DELETE',
-                        extraHeaders: { 'Prefer': 'return=minimal' }
-                    }).catch(e => console.error('Delete failed:', e));
-                }
-            }).catch(e => console.error('Fetch for delete failed:', e));
-        }
-    }
-
-    // ─── Restore state on reload ──────────────────────────────
-    async function loadExistingPoints() {
-        try {
-            const pts = await sbFetch(
-                `badminton_points?match_id=eq.${matchId}&order=last_updated.asc&select=*`
-            );
-            if (!pts || !pts.length) return;
-
-            const ppSet = match.points_per_set || 21;
-
-            // Group by set to find completed sets and current set
-            const setNums = [...new Set(pts.map(p => p.set_number))].sort((a, b) => a - b);
-
-            setNums.forEach(sn => {
-                const setPts = pts.filter(p => p.set_number === sn);
-                const pA = setPts.filter(p => p.winning_team_id === teamA.id).length;
-                const pB = setPts.filter(p => p.winning_team_id === teamB.id).length;
-
-                // If this set is completed (someone reached ppSet), record it
-                if (pA >= ppSet || pB >= ppSet) {
-                    const winner = pA >= ppSet ? 'A' : 'B';
-                    completedSets.push({ a: pA, b: pB, winner });
-                    setsWon[winner]++;
-                    currentSet = sn + 1; // advance to next set
-                } else {
-                    // This is the active/current set — restore scores
-                    currentSet = sn;
-                    scores.A = pA;
-                    scores.B = pB;
-
-                    // Rebuild point log for this set
-                    pointLog = [...setPts].reverse().map(p => ({
-                        team: p.winning_team_id === teamA.id ? 'A' : 'B',
-                        scoreA: 0, // approximate — will be overwritten
-                        scoreB: 0,
-                        time: new Date(p.last_updated).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-                        set: sn
-                    }));
-                }
-            });
-
-            // If all known sets are completed, currentSet is already advanced
-            // but scores should be 0,0 for the new set
-            const lastSetPts = pts.filter(p => p.set_number === Math.max(...setNums));
-            const lastPtA = lastSetPts.filter(p => p.winning_team_id === teamA.id).length;
-            const lastPtB = lastSetPts.filter(p => p.winning_team_id === teamB.id).length;
-            if (lastPtA >= ppSet || lastPtB >= ppSet) {
-                scores.A = 0;
-                scores.B = 0;
-                pointLog = [];
+            if (pointLog.length > 0 && pointLog[0].team === team) {
+                pointLog.shift();
+                renderLog();
             }
-
-            // Update UI
-            document.getElementById('scoreA').textContent = scores.A;
-            document.getElementById('scoreB').textContent = scores.B;
-            document.getElementById('setLabel').textContent = `Set #${currentSet}`;
-            document.getElementById('logSetLabel').textContent = `Set ${currentSet}`;
-            renderSetsBar();
-            renderSetsWonDots();
-            renderLog();
-
-        } catch (e) {
-            console.error('Failed to restore state:', e);
         }
     }
 
@@ -881,13 +791,8 @@
                 extraHeaders: { 'Prefer': 'return=minimal' },
                 body: { status: 'completed', winner_team_id: winnerId, scorer_id: currentScorer?.id || null }
             });
-
-            // Auto-progression: create next round match
-            if (winnerId) {
-                await runProgression(matchId, winnerId, currentScorer?.id || null);
-            }
-
             document.getElementById('completionSubtitle').textContent = 'Result saved! Redirecting...';
+            if (winnerId) { await runProgression(matchId, winnerId, currentScorer?.id || null); }
             setTimeout(() => { window.location.href = 'admin.html'; }, 2000);
         } catch (e) {
             document.getElementById('completionSubtitle').textContent = 'Error saving: ' + e.message;
