@@ -404,7 +404,25 @@
         .result-row .label { color: #5f6368; }
         .result-winner { font-weight: 700; color: #34a853; }
     </style>
-    <script src="auth.js"></script>
+    <script>
+        function getScorer() {
+            return {
+                id:       sessionStorage.getItem('scorer_id'),
+                name:     sessionStorage.getItem('scorer_name'),
+                username: sessionStorage.getItem('scorer_user')
+            };
+        }
+        function requireAuth() {
+            const s = getScorer();
+            if (!s.id) { window.location.href = 'login.html'; return null; }
+            return s;
+        }
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="progression.js"></script>
 </head>
 <body>
 <div class="app">
@@ -851,6 +869,7 @@
             </div>
             <div style="margin-top:24px;font-size:13px;color:#9e9e9e;">Redirecting...</div>`;
         document.querySelector('.app').appendChild(div);
+        if (winnerId) { await runProgression(matchId, winnerId, currentScorer?.id || null); }
         setTimeout(() => { window.location.href = 'admin.html'; }, 2500);
     }
 
