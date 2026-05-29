@@ -566,7 +566,25 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
-    <script src="auth.js"></script>
+    <script>
+        // ─── Auth helpers (inlined) ───────────────────────────
+        function getScorer() {
+            return {
+                id:       sessionStorage.getItem('scorer_id'),
+                name:     sessionStorage.getItem('scorer_name'),
+                username: sessionStorage.getItem('scorer_user')
+            };
+        }
+        function requireAuth() {
+            const s = getScorer();
+            if (!s.id) { window.location.href = 'login.html'; return null; }
+            return s;
+        }
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -768,7 +786,7 @@
         async function loadMatches() {
             try {
                 const matches = await sbFetch(
-                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=*,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name),sport:sports(sport_name),winner:teams!matches_winner_team_id_fkey(team_name)`
+                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,team1:teams!matches_team1_id_fkey(team_id,team_name),team2:teams!matches_team2_id_fkey(team_id,team_name),sport:sports(sport_name),winner:teams!matches_winner_team_id_fkey(team_name)`
                 );
                 matchesList = matches || [];
                 renderMatches();
