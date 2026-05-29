@@ -926,13 +926,30 @@
     }
 
     // ─── Undo ─────────────────────────────────────────────────
-    function undoLastPoint() {
+    async function undoLastPoint() {
         if (!pointLog.length) return;
         const last = pointLog[0];
+
+        // Update UI immediately
         scores[last.team] = Math.max(0, scores[last.team] - 1);
         document.getElementById('score' + last.team).textContent = scores[last.team];
         pointLog.shift();
         renderLog();
+
+        // Delete latest point for this team in current set from DB
+        try {
+            const latest = await sbFetch(
+                `badminton_points?match_id=eq.${matchId}&set_number=eq.${currentSet}&winning_team_id=eq.${last.team === 'A' ? teamA.id : teamB.id}&order=last_updated.desc&limit=1&select=point_id`
+            );
+            if (latest && latest.length > 0) {
+                await sbFetch(`badminton_points?point_id=eq.${latest[0].point_id}`, {
+                    method: 'DELETE',
+                    extraHeaders: { 'Prefer': 'return=minimal' }
+                });
+            }
+        } catch(e) {
+            console.error('Undo delete failed:', e);
+        }
     }
 
     // ─── Render helpers ───────────────────────────────────────
