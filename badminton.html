@@ -446,6 +446,7 @@
             window.location.href = 'login.html';
         }
     </script>
+    <script src="progression.js"></script>
 </head>
 <body>
 <div class="app">
@@ -880,6 +881,12 @@
                 extraHeaders: { 'Prefer': 'return=minimal' },
                 body: { status: 'completed', winner_team_id: winnerId, scorer_id: currentScorer?.id || null }
             });
+
+            // Auto-progression: create next round match
+            if (winnerId) {
+                await runProgression(matchId, winnerId, currentScorer?.id || null);
+            }
+
             document.getElementById('completionSubtitle').textContent = 'Result saved! Redirecting...';
             setTimeout(() => { window.location.href = 'admin.html'; }, 2000);
         } catch (e) {
