@@ -378,12 +378,17 @@
         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
         const todayEnd   = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
 
-        // Fetch today's matches without embedded joins
-        const matches = await sbFetch(
-            `matches?scheduled_time=gte.${todayStart}&scheduled_time=lt.${todayEnd}&order=scheduled_time.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number`
-        );
+        const fields = `match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number`;
 
-        if (!matches || !matches.length) {
+        // Fetch live matches (any date) + today's scheduled matches
+        const [liveData, scheduledData] = await Promise.all([
+            sbFetch(`matches?status=eq.live&order=scheduled_time.asc&select=${fields}`),
+            sbFetch(`matches?status=eq.scheduled&scheduled_time=gte.${todayStart}&scheduled_time=lt.${todayEnd}&order=scheduled_time.asc&select=${fields}`)
+        ]);
+
+        const combined = [...(liveData || []), ...(scheduledData || [])];
+
+        if (!combined.length) {
             allMatches = []; liveMatches = []; upcomingMatches = [];
             return;
         }
@@ -397,7 +402,7 @@
         const teamMap  = Object.fromEntries((teams  || []).map(t => [t.team_id,  t]));
         const sportMap = Object.fromEntries((sports || []).map(s => [s.sport_id, s]));
 
-        allMatches = matches.map(m => ({
+        allMatches = combined.map(m => ({
             ...m,
             team1:  teamMap[m.team1_id]  || null,
             team2:  teamMap[m.team2_id]  || null,
@@ -405,14 +410,11 @@
             winner: teamMap[m.winner_team_id] || null
         }));
 
-        allMatches      = allMatches.length ? allMatches : [];
         liveMatches     = allMatches.filter(m => m.status === 'live');
         upcomingMatches = allMatches.filter(m => m.status === 'scheduled');
 
         // For live matches, fetch current set scores from points tables
         await enrichLiveScores();
-
-        return matches;
     }
 
     // For each live match, count set scores from the relevant points table
