@@ -917,15 +917,19 @@
         }
 
         // ─── Step 1: Sports ───────────────────────────────────
+        const EXCLUDED_SPORTS = ['Cricket', 'Football', 'Chess'];
+
         function renderSports() {
             const select = document.getElementById('gameSelect');
             select.innerHTML = '<option value="">Choose a game...</option>';
-            sportsList.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.sport_id;
-                opt.textContent = s.sport_name;
-                select.appendChild(opt);
-            });
+            sportsList
+                .filter(s => !EXCLUDED_SPORTS.includes(s.sport_name))
+                .forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.sport_id;
+                    opt.textContent = s.sport_name;
+                    select.appendChild(opt);
+                });
             select.onchange = function () {
                 selectedSportId = this.value || null;
                 document.getElementById('nextBtn1').disabled = !selectedSportId;
