@@ -152,12 +152,12 @@
 
     let allMatches = [], teamMap = {}, sportMap = {};
     let activeSport = null, activeSportName = null;
-    let activeView = 'matches', activeStage = 'GS1';
+    let activeView = 'matches', activeStage = 'GS1', activeCategory = null;
 
     // ── Fetch ──────────────────────────────────────────────────
     async function fetchAll() {
         const [matches, teams, sports] = await Promise.all([
-            sbFetch(`matches?order=match_number.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number`),
+            sbFetch(`matches?order=match_number.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,category`),
             sbFetch(`teams?select=team_id,team_name`),
             sbFetch(`sports?select=sport_id,sport_name`)
         ]);
@@ -241,7 +241,7 @@
     }
 
     function selectSport(sportId, sportName, rerender = true) {
-        activeSport = sportId; activeSportName = sportName; activeStage = 'GS1';
+        activeSport = sportId; activeSportName = sportName; activeStage = 'GS1'; activeCategory = null;
         document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
         const tab = document.querySelector(`[data-sport-id="${sportId}"]`);
         if (tab) tab.classList.add('active');
@@ -274,8 +274,30 @@
 
     function selectStage(round) { activeStage = round; renderStageTabs(); renderMatchesView(); }
 
+    function renderCategoryTabs() {
+        const sportMatches = allMatches.filter(m => m.sport_id === activeSport);
+        const cats = [...new Set(sportMatches.map(m => m.category).filter(Boolean))].sort();
+        const el = document.getElementById('categoryTabs');
+        const inner = document.getElementById('categoryTabsInner');
+        if (!cats.length) { el.style.display = 'none'; activeCategory = null; return; }
+        el.style.display = 'block';
+        inner.innerHTML = [null, ...cats].map(cat => {
+            const label = cat === null ? 'All' : cat;
+            const isActive = activeCategory === cat;
+            const style = isActive ? 'background:#1a73e8;color:white;border-color:#1a73e8;' : '';
+            return `<div onclick="selectCategory(${cat === null ? 'null' : `'${cat}'`})" style="padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid #e0e0e0;color:#5f6368;background:white;flex-shrink:0;transition:all 0.2s;${style}">${label}</div>`;
+        }).join('');
+    }
+
+    function selectCategory(cat) {
+        activeCategory = cat;
+        renderCategoryTabs();
+        renderContent();
+    }
+
     function render() {
         if (!activeSport) { document.getElementById('mainContent').innerHTML = '<div class="no-sport">Select a sport above</div>'; return; }
+        renderCategoryTabs();
         renderStageTabs();
         renderContent();
     }
@@ -288,7 +310,7 @@
     // ── Matches View ───────────────────────────────────────────
     function renderMatchesView() {
         const content = document.getElementById('mainContent');
-        const matches = allMatches.filter(m => m.sport_id === activeSport && m.round === activeStage);
+        const matches = allMatches.filter(m => m.sport_id === activeSport && m.round === activeStage && (activeCategory === null || m.category === activeCategory));
         if (!matches.length) { content.innerHTML = `<div class="empty-state">No ${ROUND_LABELS[activeStage]||activeStage} matches yet</div>`; return; }
         content.innerHTML = matches.map(buildMatchCard).join('');
     }
@@ -325,7 +347,10 @@
         return `<div class="match-card ${isLive?'live-card':''} ${isFinished?'finished-card':''}" ${click}>
             <div class="match-card-top">
                 <span class="match-num" style="background:${sc.bg};color:${sc.color};padding:2px 8px;border-radius:8px;">${m.match_number||''}</span>
-                ${badge}
+                <div style="display:flex;gap:5px;align-items:center;">
+                    ${m.category ? `<span style="font-size:11px;font-weight:600;background:#f1f3f4;color:#5f6368;padding:2px 8px;border-radius:8px;">${m.category}</span>` : ''}
+                    ${badge}
+                </div>
             </div>
             <div class="match-team"><span class="match-team-name ${isTBD1?'tbd':''}">${t1}</span>${s1}</div>
             <div class="match-team"><span class="match-team-name ${isTBD2?'tbd':''}">${t2}</span>${s2}</div>
@@ -347,7 +372,7 @@
     // ── Tournament Path ────────────────────────────────────────
     function renderPathView() {
         const content = document.getElementById('mainContent');
-        const sm = allMatches.filter(m => m.sport_id === activeSport);
+        const sm = allMatches.filter(m => m.sport_id === activeSport && (activeCategory === null || m.category === activeCategory));
         const rounds = ROUND_ORDER.filter(r => sm.some(m => m.round === r) || shouldShowRound(r, sm));
         if (!rounds.length) { content.innerHTML = '<div class="empty-state">No matches created yet</div>'; return; }
         content.innerHTML = rounds.map(r => renderPathRound(r, sm)).join('');

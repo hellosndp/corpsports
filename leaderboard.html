@@ -90,6 +90,11 @@
         <div class="skeleton" style="width:80px;height:32px;border-radius:20px;flex-shrink:0;"></div>
     </div>
 
+    <!-- Category sub-tabs (shown when sport != All) -->
+    <div id="categoryTabs" style="display:none;">
+        <div style="display:flex;gap:6px;padding:8px 16px 4px;overflow-x:auto;border-bottom:1px solid #f0f0f0;" id="categoryTabsInner"></div>
+    </div>
+
     <!-- Table header -->
     <div class="table-header">
         <div class="col-head">Pos</div>
@@ -146,6 +151,7 @@
     const SPORT_COLORS   = { 'Badminton':'#2e7d32','Table Tennis':'#c62828','Volleyball':'#e65100','Carrom':'#6a1b9a','8-Ball Pool':'#00695c' };
 
     let allTeams    = [];
+    let activeCategory = null;
     let allMatches  = [];
     let allSports   = [];
     let participationMap = {}; // team_id -> total participation points
@@ -163,7 +169,8 @@
     async function loadData() {
         const [teams, matches, sports, tournament, participation] = await Promise.all([
             sbFetch(`teams?select=team_id,team_name`),
-            sbFetch(`matches?select=match_id,sport_id,team1_id,team2_id,status,winner_team_id&status=in.(completed,walkover)`),
+            sbFetch(`matches?select=match_id,sport_id,team1_id,team2_id,status,winner_team_id,category&status=in.(completed,walkover)`),
+
             sbFetch(`sports?select=sport_id,sport_name`),
             sbFetch(`tournament?select=points_per_win&limit=1`),
             sbFetch(`participation_points?select=team_id,points`).catch(() => [])
@@ -189,9 +196,11 @@
             sportId = sport?.sport_id || null;
         }
 
-        const filtered = sportId
-            ? allMatches.filter(m => m.sport_id === sportId)
-            : allMatches;
+        const filtered = allMatches.filter(m => {
+            if (sportId && m.sport_id !== sportId) return false;
+            if (activeCategory && m.category !== activeCategory) return false;
+            return true;
+        });
 
         // Build per-team stats
         const stats = {};
@@ -245,9 +254,34 @@
         }).join('');
     }
 
+    function renderCategoryTabs() {
+        const el = document.getElementById('categoryTabs');
+        const inner = document.getElementById('categoryTabsInner');
+        if (activeSport === 'All') { el.style.display = 'none'; activeCategory = null; return; }
+        const sportObj = allSports.find(s => s.sport_name === activeSport);
+        const sportId  = sportObj?.sport_id;
+        const cats = [...new Set(allMatches.filter(m => m.sport_id === sportId && m.category).map(m => m.category))].sort();
+        if (!cats.length) { el.style.display = 'none'; activeCategory = null; return; }
+        el.style.display = 'block';
+        inner.innerHTML = [null, ...cats].map(cat => {
+            const label = cat === null ? 'All' : cat;
+            const isActive = activeCategory === cat;
+            const style = isActive ? 'background:#1a73e8;color:white;border-color:#1a73e8;' : 'background:white;color:#5f6368;border:1.5px solid #e0e0e0;';
+            return `<div onclick="selectCategory(${cat===null?'null':`'${cat}'`})" style="padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all 0.2s;${style}">${label}</div>`;
+        }).join('');
+    }
+
+    function selectCategory(cat) {
+        activeCategory = cat;
+        renderCategoryTabs();
+        renderTable();
+    }
+
     function selectSport(sport) {
         activeSport = sport;
+        activeCategory = null;
         renderSportTabs();
+        renderCategoryTabs();
         renderTable();
     }
 
@@ -282,6 +316,7 @@
         try {
             await loadData();
             renderSportTabs();
+            renderCategoryTabs();
             renderTable();
         } catch(e) {
             document.getElementById('tableBody').innerHTML = '<div class="empty-state">Failed to load</div>';

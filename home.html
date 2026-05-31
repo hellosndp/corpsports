@@ -518,7 +518,7 @@
                         <div class="live-dot"></div>
                         <span class="live-text">Live</span>
                     </div>
-                    <div class="hero-sport">${sport} ${roundLabel ? '· ' + roundLabel : ''} ${matchNum ? '· ' + matchNum : ''} ${setInfo ? '· ' + setInfo : ''}</div>
+                    <div class="hero-sport">${sport}${m.category ? ' · ' + m.category : ''} ${roundLabel ? '· ' + roundLabel : ''} ${matchNum ? '· ' + matchNum : ''} ${setInfo ? '· ' + setInfo : ''}</div>
                     <div>
                         <div class="hero-team">
                             <span class="hero-team-name">${team1}</span>
@@ -565,8 +565,11 @@
             const sportColor = SPORT_COLORS[sport] || { bg: '#e8f0fe', color: '#1a73e8' };
             return `
                 <div class="match-card" onclick="window.location.href='fixtures.html'">
-                    <span class="match-sport" style="background:${sportColor.bg};color:${sportColor.color}">${sport}</span>
-                    ${roundLabel ? `<div style="margin-bottom:8px;margin-top:4px;"><span style="font-size:11px;font-weight:700;background:#f1f3f4;color:#5f6368;padding:2px 8px;border-radius:8px;">${roundLabel}${matchNum ? ' · ' + matchNum : ''}</span></div>` : ''}
+                    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;">
+                        <span class="match-sport" style="background:${sportColor.bg};color:${sportColor.color}">${sport}</span>
+                        ${m.category ? `<span style="font-size:11px;font-weight:600;background:#f1f3f4;color:#5f6368;padding:2px 8px;border-radius:8px;">${m.category}</span>` : ''}
+                    </div>
+                    ${roundLabel ? `<div style="margin-bottom:8px;"><span style="font-size:11px;font-weight:700;background:#f1f3f4;color:#5f6368;padding:2px 8px;border-radius:8px;">${roundLabel}${matchNum ? ' · ' + matchNum : ''}</span></div>` : ''}
                     <div>
                         <div class="match-team"><span class="match-team-name">${team1}</span></div>
                         <div class="match-team"><span class="match-team-name">${team2}</span></div>
