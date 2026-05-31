@@ -179,24 +179,32 @@
     }
 
     async function loadData() {
-        const [teams, matches, sports, tournament, participation] = await Promise.all([
+        const [teams, matches, sports, tournament, participation, carromPts] = await Promise.all([
             sbFetch(`teams?select=team_id,team_name`),
             sbFetch(`matches?select=match_id,sport_id,team1_id,team2_id,status,winner_team_id,category&status=in.(completed,walkover)`),
-
             sbFetch(`sports?select=sport_id,sport_name`),
             sbFetch(`tournament?select=points_per_win&limit=1`),
-            sbFetch(`participation_points?select=team_id,points`).catch(() => [])
+            sbFetch(`participation_points?select=team_id,points`).catch(() => []),
+            sbFetch(`carrom_points?select=winner_team_id,points`).catch(() => [])
         ]);
 
         allTeams   = teams   || [];
         allMatches = matches || [];
         allSports  = sports  || [];
         ptsPerWin  = tournament?.[0]?.points_per_win || 100;
+        allCarromPts = carromPts || [];
 
-        // Build participation map: team_id -> total points
+        // Build participation map
         participationMap = {};
         (participation || []).forEach(p => {
             participationMap[p.team_id] = (participationMap[p.team_id] || 0) + p.points;
+        });
+
+        // Build carrom game points map: sum all points won per team
+        carromGamePtsMap = {};
+        allCarromPts.forEach(p => {
+            if (!p.winner_team_id || !p.points) return;
+            carromGamePtsMap[p.winner_team_id] = (carromGamePtsMap[p.winner_team_id] || 0) + p.points;
         });
     }
 
