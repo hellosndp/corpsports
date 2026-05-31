@@ -6,8 +6,8 @@
     <title>Leaderboard - Corporate Sports</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding-bottom: 120px; }
-        .container { max-width: 480px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding-bottom: 120px; margin: 0; }
+        .container { max-width: 480px; margin: 0 auto; background: white; min-height: 100vh; }
 
         .header { background: #1a73e8; color: white; padding: 16px 20px; font-size: 18px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .header-refresh { font-size: 12px; opacity: 0.8; font-weight: 400; }
@@ -28,7 +28,7 @@
         /* Table */
         .table-header {
             display: grid;
-            grid-template-columns: 44px 1fr 36px 36px 36px 36px 44px;
+            grid-template-columns: 44px 1fr 36px 36px 36px 36px 40px 44px;
             gap: 4px;
             padding: 10px 16px;
             background: #f8f9fa;
@@ -42,7 +42,7 @@
 
         .table-row {
             display: grid;
-            grid-template-columns: 44px 1fr 36px 36px 36px 36px 44px;
+            grid-template-columns: 44px 1fr 36px 36px 36px 36px 40px 44px;
             gap: 4px;
             padding: 12px 16px;
             border-bottom: 1px solid #f0f0f0;
@@ -103,6 +103,7 @@
         <div class="col-head">W</div>
         <div class="col-head">L</div>
         <div class="col-head">D</div>
+        <div class="col-head">GP</div>
         <div class="col-head">Pts</div>
     </div>
 
@@ -120,6 +121,7 @@
         <div class="legend-item"><span class="legend-key">W</span> = Wins</div>
         <div class="legend-item"><span class="legend-key">L</span> = Losses</div>
         <div class="legend-item"><span class="legend-key">D</span> = Draws</div>
+        <div class="legend-item"><span class="legend-key">GP</span> = Game Points</div>
         <div class="legend-item"><span class="legend-key">Pts</span> = Points</div>
     </div>
 </div>
@@ -151,6 +153,9 @@
     const SPORT_COLORS   = { 'Badminton':'#2e7d32','Table Tennis':'#c62828','Volleyball':'#e65100','Carrom':'#6a1b9a','8-Ball Pool':'#00695c' };
 
     let allTeams    = [];
+    let allCarromPts = [];
+    let carromGamePtsMap = {};
+    let carromSportId = null;
     let activeCategory = null;
     let allMatches  = [];
     let allSports   = [];
@@ -205,7 +210,7 @@
         // Build per-team stats
         const stats = {};
         allTeams.forEach(t => {
-            stats[t.team_id] = { team_id: t.team_id, team_name: t.team_name, played: 0, wins: 0, losses: 0, draws: 0, pts: 0 };
+            stats[t.team_id] = { team_id: t.team_id, team_name: t.team_name, played: 0, wins: 0, losses: 0, draws: 0, pts: 0, gp: 0 };
         });
 
         filtered.forEach(m => {
@@ -237,9 +242,19 @@
             });
         }
 
-        // Sort by pts desc, wins desc, team name asc
+        // Add Carrom game points
+        const isCarromView = sportFilter === 'All' || sportFilter === 'Carrom';
+        if (isCarromView) {
+            allTeams.forEach(t => {
+                if (stats[t.team_id]) {
+                    stats[t.team_id].gp += carromGamePtsMap[t.team_id] || 0;
+                }
+            });
+        }
+
+        // Sort by pts desc, then gp desc, then wins desc
         return Object.values(stats).sort((a, b) =>
-            b.pts - a.pts || b.wins - a.wins || a.team_name.localeCompare(b.team_name)
+            b.pts - a.pts || b.gp - a.gp || b.wins - a.wins || a.team_name.localeCompare(b.team_name)
         );
     }
 
@@ -304,6 +319,7 @@
                     <div class="col-stat">${t.wins}</div>
                     <div class="col-stat">${t.losses}</div>
                     <div class="col-stat">${t.draws}</div>
+                    <div class="col-stat" style="color:${t.gp>0?'#e65100':'#5f6368'};font-weight:${t.gp>0?'700':'400'}">${t.gp||0}</div>
                     <div class="col-pts">${t.pts}</div>
                 </div>`;
         }).join('');
