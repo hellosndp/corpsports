@@ -833,8 +833,8 @@
 
             const filtered = matchesList.filter(m =>
                 activeTab === 'completed'
-                    ? m.status === 'completed'
-                    : m.status !== 'completed'
+                    ? (m.status === 'completed' || m.status === 'walkover')
+                    : (m.status !== 'completed' && m.status !== 'walkover')
             );
 
             if (!filtered.length) {

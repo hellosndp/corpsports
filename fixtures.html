@@ -455,9 +455,15 @@
             winner: teamMap[m.winner_team_id] || null
         }));
 
-        // Enrich live/completed with scores
-        const toEnrich = allMatches.filter(m => m.status === 'live' || m.status === 'completed');
-        await Promise.all(toEnrich.map(enrichMatchScores));
+        // Enrich only live matches on every poll (fast), completed once
+        const liveToEnrich = allMatches.filter(m => m.status === 'live');
+        const completedToEnrich = allMatches.filter(m => 
+            (m.status === 'completed' || m.status === 'walkover') && !m._enriched
+        );
+        await Promise.all([
+            ...liveToEnrich.map(enrichMatchScores),
+            ...completedToEnrich.map(async m => { await enrichMatchScores(m); m._enriched = true; })
+        ]);
     }
 
     async function enrichMatchScores(m) {
@@ -518,6 +524,7 @@
     function selectSport(sportId, sportName, rerender = true) {
         activeSport     = sportId;
         activeSportName = sportName;
+        activeStage     = 'GS1'; // reset stage on sport change
         document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
         const tab = document.querySelector(`[data-sport-id="${sportId}"]`);
         if (tab) tab.classList.add('active');

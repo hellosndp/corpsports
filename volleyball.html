@@ -553,24 +553,29 @@
         <div class="popup-icon icon-flag">🏁</div>
         <div class="popup-title">End Match</div>
         <div class="popup-sub" id="endMatchSub">Select the match winner</div>
-        <div class="team-picker" id="teamPickerSection">
-            <button class="team-pick-btn pick-a" id="pickA" onclick="selectEndWinner('A')"></button>
-            <button class="team-pick-btn pick-b" id="pickB" onclick="selectEndWinner('B')"></button>
+        <!-- Fixed height container so walkover checkbox never moves -->
+        <div style="min-height:90px;">
+            <div id="teamPickerSection">
+                <div class="team-picker">
+                    <button class="team-pick-btn pick-a" id="pickA" onclick="selectEndWinner('A')"></button>
+                    <button class="team-pick-btn pick-b" id="pickB" onclick="selectEndWinner('B')"></button>
+                </div>
+            </div>
+            <div id="walkoverTeamPicker" style="display:none;">
+                <div style="font-size:13px;color:#5f6368;margin-bottom:8px;font-weight:600;">Who wins by walkover?</div>
+                <div class="team-picker">
+                    <button class="team-pick-btn pick-a" id="walkoverPickA" onclick="selectWalkoverWinner('A')"></button>
+                    <button class="team-pick-btn pick-b" id="walkoverPickB" onclick="selectWalkoverWinner('B')"></button>
+                </div>
+            </div>
         </div>
-        <!-- Walkover checkbox -->
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 0;margin-bottom:8px;border-top:1px solid #f0f0f0;margin-top:4px;">
+        <!-- Walkover checkbox always at bottom -->
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 0;margin-bottom:12px;border-top:1px solid #f0f0f0;">
             <input type="checkbox" id="walkoverCheck" onchange="toggleWalkover()"
                    style="width:18px;height:18px;cursor:pointer;accent-color:#ea4335;">
             <label for="walkoverCheck" style="font-size:14px;font-weight:600;color:#5f6368;cursor:pointer;">
                 Mark this game as Walkover
             </label>
-        </div>
-        <div id="walkoverTeamPicker" style="display:none;margin-bottom:12px;">
-            <div style="font-size:13px;color:#5f6368;margin-bottom:8px;font-weight:600;">Who wins by walkover?</div>
-            <div class="team-picker">
-                <button class="team-pick-btn pick-a" id="walkoverPickA" onclick="selectWalkoverWinner('A')"></button>
-                <button class="team-pick-btn pick-b" id="walkoverPickB" onclick="selectWalkoverWinner('B')"></button>
-            </div>
         </div>
         <button class="popup-btn btn-red" id="endConfirmBtn" onclick="finalizeFromEnd()" disabled>End & Save Match</button>
         <button class="popup-btn btn-ghost" onclick="closeAllPopups()">Cancel</button>
@@ -903,6 +908,7 @@
                     scorer_id: currentScorer?.id || null
                 }
             });
+            if (match.round === 'GS1' && !walkover && winnerId) { await awardGS1Points(winnerId); }
             document.getElementById('completionSubtitle').textContent = 'Result saved! Redirecting...';
             if (winnerId) { await runProgression(matchId, winnerId, currentScorer?.id || null); }
             setTimeout(() => { window.location.href = 'admin.html'; }, 2000);
@@ -1010,6 +1016,24 @@
         }).join('');
     }
 
+
+    async function awardGS1Points(winnerId) {
+        try {
+            await sbFetch('participation_points', {
+                method: 'POST',
+                extraHeaders: { 'Prefer': 'return=minimal' },
+                body: { match_id: matchId, team_id: match.team1_id, points: 100, reason: 'participation' }
+            });
+            await sbFetch('participation_points', {
+                method: 'POST',
+                extraHeaders: { 'Prefer': 'return=minimal' },
+                body: { match_id: matchId, team_id: match.team2_id, points: 100, reason: 'participation' }
+            });
+            console.log('GS1 participation points awarded');
+        } catch(e) {
+            console.error('Points award error:', e);
+        }
+    }
     function closeAllPopups() {
         ['setWinnerOverlay','matchWinnerOverlay','endMatchOverlay'].forEach(id => {
             document.getElementById(id).classList.remove('visible');
