@@ -473,6 +473,10 @@
         <div class="popup-icon">🎉</div>
         <div class="popup-title" id="matchOverTitle">Match Complete!</div>
         <div class="result-summary" id="matchSummary"></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 0;margin-bottom:12px;border-top:1px solid #f0f0f0;">
+            <input type="checkbox" id="walkoverCheck" style="width:18px;height:18px;cursor:pointer;accent-color:#ea4335;">
+            <label for="walkoverCheck" style="font-size:14px;font-weight:600;color:#5f6368;cursor:pointer;">Mark as Walkover</label>
+        </div>
         <button class="popup-btn btn-primary" onclick="finalizeMatch()">Confirm & Save</button>
         <button class="popup-btn btn-ghost" onclick="closeOverlay('matchOverOverlay')">Cancel</button>
     </div>
@@ -811,6 +815,7 @@
         const wonB = sets.filter(s => s.done && s.winner === 'B').length;
         const winnerId = wonA > wonB ? teamA.id : wonB > wonA ? teamB.id : null;
         const winnerName = wonA > wonB ? teamA.name : wonB > wonA ? teamB.name : 'Draw';
+        const isWalkover = document.getElementById('walkoverCheck')?.checked || false;
 
         closeOverlay('matchOverOverlay');
 
@@ -818,7 +823,11 @@
             await sbFetch(`matches?match_id=eq.${matchId}`, {
                 method: 'PATCH',
                 extraHeaders: { 'Prefer': 'return=minimal' },
-                body: { status: 'completed', winner_team_id: winnerId, scorer_id: currentScorer?.id || null }
+                body: {
+                    status: isWalkover ? 'walkover' : 'completed',
+                    winner_team_id: winnerId,
+                    scorer_id: currentScorer?.id || null
+                }
             });
 
             if (winnerId) {
