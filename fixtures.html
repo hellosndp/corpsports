@@ -235,8 +235,10 @@
             const first = ALL_SPORTS.find(s => sportsWithMatches.has(s));
             if (first) {
                 const sport = Object.values(sportMap).find(sp => sp.sport_name === first);
-                if (sport) selectSport(sport.sport_id, first, false);
+                if (sport) selectSport(sport.sport_id, first, true); // true = render immediately
             }
+        } else if (activeSport) {
+            render(); // re-render on poll refresh
         }
     }
 
