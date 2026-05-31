@@ -611,6 +611,13 @@
             <div class="tab-btn" id="tabCompleted" onclick="switchTab('completed')">Completed</div>
         </div>
 
+        <!-- Sport filter -->
+        <div style="display:flex;gap:6px;padding:10px 16px 4px;overflow-x:auto;border-bottom:1px solid #f0f0f0;" id="adminSportTabs"></div>
+        <!-- Category filter (shown only when sport selected) -->
+        <div id="adminCategoryRow" style="display:none;border-bottom:1px solid #f0f0f0;">
+            <div style="display:flex;gap:6px;padding:8px 16px 8px;overflow-x:auto;" id="adminCategoryTabs"></div>
+        </div>
+
         <div class="matches-section">
             <div id="matchesList"></div>
         </div>
@@ -775,6 +782,8 @@
 
         // ─── Load & Render Matches ────────────────────────────
         let activeTab = 'scheduled';
+        let activeAdminSport = null;
+        let activeAdminCategory = null;
 
         function switchTab(tab) {
             activeTab = tab;
@@ -783,10 +792,54 @@
             renderMatches();
         }
 
+        function renderAdminSportTabs() {
+            const SPORT_COLORS = { 'Badminton':'#2e7d32','Table Tennis':'#c62828','Volleyball':'#e65100','Carrom':'#6a1b9a','8-Ball Pool':'#00695c' };
+            const sports = [...new Set(matchesList.map(m => m.sport?.sport_name).filter(Boolean))].sort();
+            const container = document.getElementById('adminSportTabs');
+            const tabs = [null, ...sports].map(s => {
+                const label = s === null ? 'All' : s;
+                const isActive = activeAdminSport === s;
+                const col = s ? (SPORT_COLORS[s] || '#1a73e8') : '#1a73e8';
+                const style = isActive ? `background:${col};color:white;border-color:${col};` : 'background:white;color:#5f6368;border:1.5px solid #e0e0e0;';
+                return `<div onclick="selectAdminSport(${s===null?'null':`'${s}'`})" style="padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all 0.2s;${style}">${label}</div>`;
+            }).join('');
+            container.innerHTML = tabs;
+        }
+
+        function renderAdminCategoryTabs() {
+            const row = document.getElementById('adminCategoryRow');
+            const inner = document.getElementById('adminCategoryTabs');
+            if (!activeAdminSport) { row.style.display = 'none'; return; }
+            const sportMatches = matchesList.filter(m => m.sport?.sport_name === activeAdminSport);
+            const cats = [...new Set(sportMatches.map(m => m.category).filter(Boolean))].sort();
+            if (!cats.length) { row.style.display = 'none'; activeAdminCategory = null; return; }
+            row.style.display = 'block';
+            inner.innerHTML = [null, ...cats].map(cat => {
+                const label = cat === null ? 'All' : cat;
+                const isActive = activeAdminCategory === cat;
+                const style = isActive ? 'background:#1a73e8;color:white;border-color:#1a73e8;' : 'background:white;color:#5f6368;border:1.5px solid #e0e0e0;';
+                return `<div onclick="selectAdminCategory(${cat===null?'null':`'${cat}'`})" style="padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all 0.2s;${style}">${label}</div>`;
+            }).join('');
+        }
+
+        function selectAdminSport(sport) {
+            activeAdminSport = sport;
+            activeAdminCategory = null;
+            renderAdminSportTabs();
+            renderAdminCategoryTabs();
+            renderMatches();
+        }
+
+        function selectAdminCategory(cat) {
+            activeAdminCategory = cat;
+            renderAdminCategoryTabs();
+            renderMatches();
+        }
+
         async function loadMatches() {
             try {
                 const matches = await sbFetch(
-                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number`
+                    `matches?tournament_id=eq.${tournamentId}&order=scheduled_time.desc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,category`
                 );
                 if (!matches || !matches.length) { matchesList = []; renderMatches(); return; }
 
@@ -804,6 +857,8 @@
                     sport:  sportMap[m.sport_id] || null,
                     winner: teamMap[m.winner_team_id] || null
                 }));
+                renderAdminSportTabs();
+                renderAdminCategoryTabs();
                 renderMatches();
             } catch (e) {
                 console.error('Failed to load matches:', e);
@@ -831,11 +886,14 @@
         function renderMatches() {
             const container = document.getElementById('matchesList');
 
-            const filtered = matchesList.filter(m =>
-                activeTab === 'completed'
+            const filtered = matchesList.filter(m => {
+                const tabMatch = activeTab === 'completed'
                     ? (m.status === 'completed' || m.status === 'walkover')
-                    : (m.status !== 'completed' && m.status !== 'walkover')
-            );
+                    : (m.status !== 'completed' && m.status !== 'walkover');
+                const sportMatch = !activeAdminSport || m.sport?.sport_name === activeAdminSport;
+                const catMatch   = !activeAdminCategory || m.category === activeAdminCategory;
+                return tabMatch && sportMatch && catMatch;
+            });
 
             if (!filtered.length) {
                 const msg = activeTab === 'completed'
@@ -882,9 +940,10 @@
                         <div class="match-card-top">
                             <span class="sport-badge" style="background:${sportColor.bg};color:${sportColor.color}">${sport}</span>
                         </div>
-                        ${roundLabel ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-                            <span style="font-size:11px;font-weight:700;background:#f1f3f4;color:#5f6368;padding:3px 8px;border-radius:8px;text-transform:uppercase;">${roundLabel}</span>
+                        ${roundLabel || matchNum || m.category ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+                            ${roundLabel ? `<span style="font-size:11px;font-weight:700;background:#f1f3f4;color:#5f6368;padding:3px 8px;border-radius:8px;text-transform:uppercase;">${roundLabel}</span>` : ''}
                             ${matchNum ? `<span style="font-size:11px;font-weight:700;color:#9e9e9e;">${matchNum}</span>` : ''}
+                            ${m.category ? `<span style="font-size:11px;font-weight:600;background:#e8eaf6;color:#3949ab;padding:3px 8px;border-radius:8px;">${m.category}</span>` : ''}
                         </div>` : ''}
                         <div class="match-teams">
                             <div class="match-team"><span class="match-team-name">${team1}</span></div>
