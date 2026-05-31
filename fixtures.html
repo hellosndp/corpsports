@@ -607,9 +607,9 @@
         const isTBD1 = !m.team1?.team_name;
         const isTBD2 = !m.team2?.team_name;
 
-        const time = m.scheduled_time
-            ? new Date(m.scheduled_time).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-            : '';
+        const SPORT_COLORS = { 'Badminton': { bg: '#e8f5e9', color: '#2e7d32' }, 'Table Tennis': { bg: '#fce4ec', color: '#c62828' }, 'Volleyball': { bg: '#fff3e0', color: '#e65100' }, 'Carrom': { bg: '#f3e5f5', color: '#6a1b9a' }, '8-Ball Pool': { bg: '#e0f7fa', color: '#00695c' } };
+        const sName = activeSportName || '';
+        const sportColor = SPORT_COLORS[sName] || { bg: '#e8f0fe', color: '#1a73e8' };
 
         let statusBadge = '';
         if (isLive) statusBadge = `<span class="status-badge status-live"><span class="live-pulse"></span>LIVE</span>`;
@@ -630,7 +630,7 @@
 
         return `<div class="match-card ${isLive?'live-card':''} ${isDone?'completed-card':''}" ${click}>
             <div class="match-card-top">
-                <span class="match-num">${m.match_number || ''}</span>
+                <span class="match-num" style="background:${sportColor.bg};color:${sportColor.color};padding:2px 8px;border-radius:8px;">${m.match_number || ''}</span>
                 ${statusBadge}
             </div>
             <div class="match-team">

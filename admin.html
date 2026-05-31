@@ -865,6 +865,14 @@
                     QF: 'Quarter Finals', QR: 'Qualifier Round',
                     ER: 'Eliminator Round', FINAL: 'Final'
                 };
+                const SPORT_COLORS = {
+                    'Badminton':    { bg: '#e8f5e9', color: '#2e7d32' },
+                    'Table Tennis': { bg: '#fce4ec', color: '#c62828' },
+                    'Volleyball':   { bg: '#fff3e0', color: '#e65100' },
+                    'Carrom':       { bg: '#f3e5f5', color: '#6a1b9a' },
+                    '8-Ball Pool':  { bg: '#e0f7fa', color: '#00695c' },
+                };
+                const sportColor = SPORT_COLORS[sport] || { bg: '#e8f0fe', color: '#1a73e8' };
                 const roundLabel = m.round ? ROUND_LABELS[m.round] || m.round : null;
                 const matchNum   = m.match_number || '';
 
@@ -872,8 +880,7 @@
                     <div class="match-card ${clickable ? 'match-card-clickable' : ''} ${m.status === 'completed' ? 'match-card-completed' : ''}"
                          ${clickable ? `onclick="openScorer('${m.match_id}', '${sport}')"` : ''}>
                         <div class="match-card-top">
-                            <span class="sport-badge">${sport}</span>
-                            <span class="match-time">${time}</span>
+                            <span class="sport-badge" style="background:${sportColor.bg};color:${sportColor.color}">${sport}</span>
                         </div>
                         ${roundLabel ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
                             <span style="font-size:11px;font-weight:700;background:#f1f3f4;color:#5f6368;padding:3px 8px;border-radius:8px;text-transform:uppercase;">${roundLabel}</span>
