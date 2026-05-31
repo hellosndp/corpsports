@@ -837,55 +837,75 @@
 
     // ─── End Match (manual — scorer picks winner) ─────────────
     let isWalkover = false;
-    let walkoverWinner = null;
+    let selectedEndWinner = null;
 
     function openEndMatchPopup() {
         selectedEndWinner = null;
         isWalkover = false;
-        walkoverWinner = null;
         document.getElementById('pickA').classList.remove('selected');
         document.getElementById('pickB').classList.remove('selected');
+        document.getElementById('walkoverPickA').classList.remove('selected');
+        document.getElementById('walkoverPickB').classList.remove('selected');
         document.getElementById('walkoverCheck').checked = false;
         document.getElementById('walkoverTeamPicker').style.display = 'none';
-        document.getElementById('teamPickerSection').style.display = 'grid';
+        document.getElementById('teamPickerSection').style.display = 'block';
         document.getElementById('endMatchSub').textContent = 'Select the match winner';
-        document.getElementById('endConfirmBtn').disabled = true;
+        updateEndConfirmBtn();
         document.getElementById('endMatchOverlay').classList.add('visible');
     }
 
     function toggleWalkover() {
         isWalkover = document.getElementById('walkoverCheck').checked;
-        document.getElementById('teamPickerSection').style.display = isWalkover ? 'none' : 'grid';
-        document.getElementById('walkoverTeamPicker').style.display = isWalkover ? 'block' : 'none';
-        document.getElementById('endMatchSub').textContent = isWalkover ? 'Opponent did not show up' : 'Select the match winner';
-        selectedEndWinner = null;
-        walkoverWinner = null;
-        document.getElementById('endConfirmBtn').disabled = true;
-    }
 
-    function selectWalkoverWinner(team) {
-        walkoverWinner = team;
-        document.getElementById('walkoverPickA').classList.toggle('selected', team === 'A');
-        document.getElementById('walkoverPickB').classList.toggle('selected', team === 'B');
-        document.getElementById('endConfirmBtn').disabled = false;
+        if (isWalkover) {
+            // If a team was already selected, carry it over to walkover picker
+            document.getElementById('walkoverTeamPicker').style.display = 'block';
+            document.getElementById('endMatchSub').textContent = 'Opponent did not show up';
+            if (selectedEndWinner) {
+                // Mirror selection into walkover picker
+                document.getElementById('walkoverPickA').classList.toggle('selected', selectedEndWinner === 'A');
+                document.getElementById('walkoverPickB').classList.toggle('selected', selectedEndWinner === 'B');
+            }
+        } else {
+            document.getElementById('walkoverTeamPicker').style.display = 'none';
+            document.getElementById('endMatchSub').textContent = 'Select the match winner';
+            // Mirror walkover selection back to main picker
+            document.getElementById('pickA').classList.toggle('selected', selectedEndWinner === 'A');
+            document.getElementById('pickB').classList.toggle('selected', selectedEndWinner === 'B');
+        }
+        updateEndConfirmBtn();
     }
 
     function selectEndWinner(team) {
         selectedEndWinner = team;
         document.getElementById('pickA').classList.toggle('selected', team === 'A');
         document.getElementById('pickB').classList.toggle('selected', team === 'B');
-        document.getElementById('endConfirmBtn').disabled = false;
+        // If walkover is checked, mirror to walkover picker too
+        if (isWalkover) {
+            document.getElementById('walkoverPickA').classList.toggle('selected', team === 'A');
+            document.getElementById('walkoverPickB').classList.toggle('selected', team === 'B');
+        }
+        updateEndConfirmBtn();
+    }
+
+    function selectWalkoverWinner(team) {
+        selectedEndWinner = team;
+        document.getElementById('walkoverPickA').classList.toggle('selected', team === 'A');
+        document.getElementById('walkoverPickB').classList.toggle('selected', team === 'B');
+        // Mirror to main picker too
+        document.getElementById('pickA').classList.toggle('selected', team === 'A');
+        document.getElementById('pickB').classList.toggle('selected', team === 'B');
+        updateEndConfirmBtn();
+    }
+
+    function updateEndConfirmBtn() {
+        document.getElementById('endConfirmBtn').disabled = !selectedEndWinner;
     }
 
     function finalizeFromEnd() {
-        if (isWalkover) {
-            if (!walkoverWinner) return;
-            const wId = walkoverWinner === 'A' ? teamA.id : teamB.id;
-            finalizeMatch(wId, true);
-        } else {
-            if (!selectedEndWinner) return;
-            finalizeMatch(selectedEndWinner === 'A' ? teamA.id : teamB.id, false);
-        }
+        if (!selectedEndWinner) return;
+        const wId = selectedEndWinner === 'A' ? teamA.id : teamB.id;
+        finalizeMatch(wId, isWalkover);
     }
 
     // ─── Finalize & Save ─────────────────────────────────────
