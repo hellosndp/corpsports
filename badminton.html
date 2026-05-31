@@ -552,24 +552,12 @@
     <div class="popup">
         <div class="popup-icon icon-flag">🏁</div>
         <div class="popup-title">End Match</div>
-        <div class="popup-sub" id="endMatchSub">Select the match winner</div>
-        <!-- Fixed height container so walkover checkbox never moves -->
-        <div style="min-height:90px;">
-            <div id="teamPickerSection">
-                <div class="team-picker">
-                    <button class="team-pick-btn pick-a" id="pickA" onclick="selectEndWinner('A')"></button>
-                    <button class="team-pick-btn pick-b" id="pickB" onclick="selectEndWinner('B')"></button>
-                </div>
-            </div>
-            <div id="walkoverTeamPicker" style="display:none;">
-                <div style="font-size:13px;color:#5f6368;margin-bottom:8px;font-weight:600;">Who wins by walkover?</div>
-                <div class="team-picker">
-                    <button class="team-pick-btn pick-a" id="walkoverPickA" onclick="selectWalkoverWinner('A')"></button>
-                    <button class="team-pick-btn pick-b" id="walkoverPickB" onclick="selectWalkoverWinner('B')"></button>
-                </div>
-            </div>
+        <div class="popup-sub" id="endMatchSub">Select the winning team</div>
+        <div class="team-picker" style="margin-bottom:16px;">
+            <button class="team-pick-btn pick-a" id="pickA" onclick="selectEndWinner('A')"></button>
+            <button class="team-pick-btn pick-b" id="pickB" onclick="selectEndWinner('B')"></button>
         </div>
-        <!-- Walkover checkbox always at bottom -->
+        <!-- Walkover checkbox always below team picker -->
         <div style="display:flex;align-items:center;gap:10px;padding:12px 0;margin-bottom:12px;border-top:1px solid #f0f0f0;">
             <input type="checkbox" id="walkoverCheck" onchange="toggleWalkover()"
                    style="width:18px;height:18px;cursor:pointer;accent-color:#ea4335;">
@@ -648,8 +636,7 @@
             document.getElementById('teamBName').textContent = teamB.name;
             document.getElementById('pickA').textContent = teamA.name;
             document.getElementById('pickB').textContent = teamB.name;
-            document.getElementById('walkoverPickA').textContent = teamA.name;
-            document.getElementById('walkoverPickB').textContent = teamB.name;
+
 
             if (match.scheduled_time) {
                 document.getElementById('headerTime').textContent = '📅 ' +
@@ -876,62 +863,24 @@
         isWalkover = false;
         document.getElementById('pickA').classList.remove('selected');
         document.getElementById('pickB').classList.remove('selected');
-        document.getElementById('walkoverPickA').classList.remove('selected');
-        document.getElementById('walkoverPickB').classList.remove('selected');
         document.getElementById('walkoverCheck').checked = false;
-        document.getElementById('walkoverTeamPicker').style.display = 'none';
-        document.getElementById('teamPickerSection').style.display = 'block';
-        document.getElementById('endMatchSub').textContent = 'Select the match winner';
-        updateEndConfirmBtn();
+        document.getElementById('endMatchSub').textContent = 'Select the winning team';
+        document.getElementById('endConfirmBtn').disabled = true;
         document.getElementById('endMatchOverlay').classList.add('visible');
     }
 
     function toggleWalkover() {
         isWalkover = document.getElementById('walkoverCheck').checked;
-
-        if (isWalkover) {
-            // If a team was already selected, carry it over to walkover picker
-            document.getElementById('walkoverTeamPicker').style.display = 'block';
-            document.getElementById('endMatchSub').textContent = 'Opponent did not show up';
-            if (selectedEndWinner) {
-                // Mirror selection into walkover picker
-                document.getElementById('walkoverPickA').classList.toggle('selected', selectedEndWinner === 'A');
-                document.getElementById('walkoverPickB').classList.toggle('selected', selectedEndWinner === 'B');
-            }
-        } else {
-            document.getElementById('walkoverTeamPicker').style.display = 'none';
-            document.getElementById('endMatchSub').textContent = 'Select the match winner';
-            // Mirror walkover selection back to main picker
-            document.getElementById('pickA').classList.toggle('selected', selectedEndWinner === 'A');
-            document.getElementById('pickB').classList.toggle('selected', selectedEndWinner === 'B');
-        }
-        updateEndConfirmBtn();
+        document.getElementById('endMatchSub').textContent = isWalkover
+            ? 'Select winner (opponent did not show up)'
+            : 'Select the winning team';
     }
 
     function selectEndWinner(team) {
         selectedEndWinner = team;
         document.getElementById('pickA').classList.toggle('selected', team === 'A');
         document.getElementById('pickB').classList.toggle('selected', team === 'B');
-        // If walkover is checked, mirror to walkover picker too
-        if (isWalkover) {
-            document.getElementById('walkoverPickA').classList.toggle('selected', team === 'A');
-            document.getElementById('walkoverPickB').classList.toggle('selected', team === 'B');
-        }
-        updateEndConfirmBtn();
-    }
-
-    function selectWalkoverWinner(team) {
-        selectedEndWinner = team;
-        document.getElementById('walkoverPickA').classList.toggle('selected', team === 'A');
-        document.getElementById('walkoverPickB').classList.toggle('selected', team === 'B');
-        // Mirror to main picker too
-        document.getElementById('pickA').classList.toggle('selected', team === 'A');
-        document.getElementById('pickB').classList.toggle('selected', team === 'B');
-        updateEndConfirmBtn();
-    }
-
-    function updateEndConfirmBtn() {
-        document.getElementById('endConfirmBtn').disabled = !selectedEndWinner;
+        document.getElementById('endConfirmBtn').disabled = false;
     }
 
     function finalizeFromEnd() {
