@@ -9,120 +9,116 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a14;
+            background: #f5f5f5;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        /* Top bar */
+        .topbar {
+            width: 100%;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
             justify-content: center;
+        }
+
+        .brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #202124;
+            letter-spacing: -0.5px;
+        }
+
+        .brand span { color: #1a73e8; }
+
+        /* Content */
+        .content {
+            width: 100%;
+            max-width: 480px;
             padding: 32px 20px;
+            flex: 1;
         }
 
-        /* App name */
-        .app-name {
-            font-size: 13px;
+        .section-label {
+            font-size: 12px;
             font-weight: 700;
-            letter-spacing: 3px;
+            color: #9e9e9e;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.35);
-            margin-bottom: 52px;
-            position: relative;
+            letter-spacing: 0.8px;
+            margin-bottom: 14px;
         }
-
-        .app-name span {
-            color: rgba(255,255,255,0.6);
-        }
-
-        .app-name::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 24px;
-            height: 1px;
-            background: rgba(255,255,255,0.15);
-        }
-
-        /* Cards container */
-        .cards { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 360px; }
 
         /* Company card */
         .company-card {
-            background: #16162a;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 24px 20px;
-            cursor: pointer;
-            transition: all 0.25s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .company-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(26,115,232,0.08) 0%, transparent 60%);
-            opacity: 0;
-            transition: opacity 0.25s;
-        }
-
-        .company-card:hover { border-color: rgba(26,115,232,0.4); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(26,115,232,0.15); }
-        .company-card:hover::before { opacity: 1; }
-        .company-card:active { transform: scale(0.98); }
-
-        .company-logo-wrap {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
             background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .company-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: translateY(-1px); }
+        .company-card:active { transform: scale(0.99); }
+
+        /* Logo banner */
+        .card-logo-banner {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 28px 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+            min-height: 120px;
         }
 
-        .company-logo-wrap img {
-            width: 100%;
-            height: 100%;
+        .card-logo-banner img {
+            max-width: 180px;
+            max-height: 80px;
             object-fit: contain;
-            padding: 6px;
         }
 
-        .company-info { flex: 1; }
+        /* Card body */
+        .card-body {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-        .company-name {
-            font-size: 17px;
+        .card-info {}
+        .card-name {
+            font-size: 16px;
             font-weight: 700;
-            color: white;
+            color: #202124;
             margin-bottom: 4px;
-            letter-spacing: -0.2px;
         }
 
-        .company-meta {
+        .card-sub {
             font-size: 12px;
-            color: rgba(255,255,255,0.4);
+            color: #5f6368;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .meta-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.2); }
-
-        .live-indicator {
-            display: flex;
+        .live-badge {
+            display: inline-flex;
             align-items: center;
             gap: 4px;
+            background: #fce8e6;
+            color: #ea4335;
             font-size: 11px;
             font-weight: 700;
-            color: #ea4335;
+            padding: 2px 8px;
+            border-radius: 10px;
         }
 
         .live-dot {
@@ -135,52 +131,48 @@
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
         .card-arrow {
-            font-size: 18px;
-            color: rgba(255,255,255,0.2);
-            flex-shrink: 0;
-            transition: all 0.2s;
+            font-size: 22px;
+            color: #bdbdbd;
         }
 
-        .company-card:hover .card-arrow { color: rgba(26,115,232,0.7); transform: translateX(2px); }
-
-        /* Footer */
         .footer {
-            margin-top: 48px;
-            font-size: 11px;
-            color: rgba(255,255,255,0.15);
-            letter-spacing: 1px;
+            padding: 24px;
             text-align: center;
+            font-size: 12px;
+            color: #bdbdbd;
         }
     </style>
 </head>
 <body>
 
-    <div class="app-name">Off<span>Play</span>.app</div>
+    <div class="topbar">
+        <div class="brand">Off<span>Play</span>.app</div>
+    </div>
 
-    <div class="cards" id="cards">
-        <!-- NPCI card -->
+    <div class="content">
+        <div class="section-label">Organizations</div>
+
         <a class="company-card" href="home.html" id="npciCard">
-            <div class="company-logo-wrap">
+            <div class="card-logo-banner">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/NPCI-Logo.png/1280px-NPCI-Logo.png"
-                     alt="NPCI Logo"
-                     onerror="this.parentElement.innerHTML='<span style=\'font-size:20px;font-weight:800;color:#1a73e8\'>N</span>'">
+                     alt="NPCI"
+                     onerror="this.style.display='none';this.parentElement.innerHTML+='<span style=\'font-size:32px;font-weight:900;color:#1a73e8\'>NPCI</span>'">
             </div>
-            <div class="company-info">
-                <div class="company-name">NPCI Sports</div>
-                <div class="company-meta">
-                    <span>Corporate Tournament</span>
-                    <div class="meta-dot"></div>
-                    <span>2025</span>
+            <div class="card-body">
+                <div class="card-info">
+                    <div class="card-name">NPCI Sports</div>
+                    <div class="card-sub">
+                        <span>Corporate Tournament 2025</span>
+                    </div>
                 </div>
+                <div class="card-arrow">›</div>
             </div>
-            <div class="card-arrow">›</div>
         </a>
     </div>
 
     <div class="footer">More organizations coming soon</div>
 
     <script>
-        // Check for live matches and show indicator
         const SUPABASE_URL = 'https://izutkprvzuwrxudqvnin.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6dXRrcHJ2enV3cnh1ZHF2bmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NzYxNjUsImV4cCI6MjA5NTQ1MjE2NX0.MK80nCRgep3h8BpOt-Zy4EbizrXgndLD1XQCJJHIUCU';
 
@@ -191,8 +183,8 @@
                 });
                 const data = await res.json();
                 if (data && data.length > 0) {
-                    const meta = document.querySelector('#npciCard .company-meta');
-                    meta.innerHTML = `<div class="live-indicator"><div class="live-dot"></div>Live now</div>`;
+                    const sub = document.querySelector('.card-sub');
+                    sub.innerHTML = `<span>Corporate Tournament 2025</span> <span class="live-badge"><span class="live-dot"></span>Live</span>`;
                 }
             } catch(e) {}
         }

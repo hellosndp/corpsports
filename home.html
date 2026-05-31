@@ -290,10 +290,8 @@
 </head>
 <body>
 <div class="container">
-    <div style="background:#0a0a14;text-align:center;padding:6px;font-size:10px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.3);text-transform:uppercase;">Off<span style="color:rgba(255,255,255,0.5)">Play</span>.app</div>
     <div class="header">
         <span>🏆 NPCI Sports</span>
-        <span class="header-refresh" id="lastUpdated"></span>
     </div>
 
     <!-- Filter Tabs -->
@@ -599,8 +597,7 @@
     }
 
     function updateLastUpdated() {
-        document.getElementById('lastUpdated').textContent =
-            '↻ ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
     }
 
     // ─── Carousel controls ────────────────────────────────────
