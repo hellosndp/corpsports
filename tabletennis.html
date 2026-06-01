@@ -620,7 +620,7 @@
         if (!matchId) return showFatalError('No match ID provided.');
         try {
             const matches = await sbFetch(
-                `matches?match_id=eq.${matchId}&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,category&limit=1`
+                `matches?match_id=eq.${matchId}&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,category,pool&limit=1`
             );
             if (!matches || !matches.length) return showFatalError('Match not found.');
             match = matches[0];
@@ -650,7 +650,7 @@
             }
             // Show round + category in header
             const ROUND_LBL = { GS1:'Group Stage 1', GS2:'Group Stage 2', QF:'Quarter Finals', QR:'Qualifier Round', ER:'Eliminator Round', FINAL:'Final' };
-            const matchMeta = [ROUND_LBL[match.round]||match.round, match.match_number, match.category].filter(Boolean).join(' · ');
+            const matchMeta = [ROUND_LBL[match.round]||match.round, match.match_number, match.category, match.pool ? 'Pool '+match.pool : null].filter(Boolean).join(' · ');
             if (matchMeta) {
                 const el = document.getElementById('headerTime');
                 el.innerHTML = (match.scheduled_time ? el.textContent + '<br>' : '') + `<span style="font-size:11px;opacity:0.85">${matchMeta}</span>`;

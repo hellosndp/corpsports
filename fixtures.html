@@ -156,12 +156,12 @@
 
     let allMatches = [], teamMap = {}, sportMap = {};
     let activeSport = null, activeSportName = null;
-    let activeView = 'matches', activeStage = 'GS1', activeCategory = null;
+    let activeView = 'matches', activeStage = 'GS1', activeCategory = null, activePool = null;
 
     // ── Fetch ──────────────────────────────────────────────────
     async function fetchAll() {
         const [matches, teams, sports] = await Promise.all([
-            sbFetch(`matches?order=match_number.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,category`),
+            sbFetch(`matches?order=match_number.asc&select=match_id,tournament_id,sport_id,team1_id,team2_id,scheduled_time,status,winner_team_id,points_per_set,sets_to_win,round,match_number,category,pool`),
             sbFetch(`teams?select=team_id,team_name`),
             sbFetch(`sports?select=sport_id,sport_name`)
         ]);
@@ -247,7 +247,7 @@
     }
 
     function selectSport(sportId, sportName, rerender = true) {
-        activeSport = sportId; activeSportName = sportName; activeStage = 'GS1'; activeCategory = null;
+        activeSport = sportId; activeSportName = sportName; activeStage = 'GS1'; activeCategory = null; activePool = null;
         document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
         const tab = document.querySelector(`[data-sport-id="${sportId}"]`);
         if (tab) tab.classList.add('active');
@@ -297,13 +297,39 @@
 
     function selectCategory(cat) {
         activeCategory = cat;
+        activePool = null;
         renderCategoryTabs();
+        renderPoolTabs();
+        renderContent();
+    }
+
+    function renderPoolTabs() {
+        const el = document.getElementById('poolTabs');
+        const inner = document.getElementById('poolTabsInner');
+        const sportMatches = allMatches.filter(m => m.sport_id === activeSport
+            && (activeCategory === null || m.category === activeCategory));
+        const pools = [...new Set(sportMatches.map(m => m.pool).filter(Boolean))].sort();
+        if (!pools.length) { el.style.display = 'none'; activePool = null; return; }
+        el.style.display = 'block';
+        const tabs = [null, ...pools].map(p => {
+            const label = p === null ? 'All' : `Pool ${p}`;
+            const isActive = activePool === p;
+            const style = isActive ? 'background:#1a73e8;color:white;border-color:#1a73e8;' : 'background:white;color:#5f6368;border:1.5px solid #e0e0e0;';
+            return `<div onclick="selectPool(${p===null?'null':`'${p}'`})" style="padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all 0.2s;${style}">${label}</div>`;
+        }).join('');
+        inner.innerHTML = tabs;
+    }
+
+    function selectPool(pool) {
+        activePool = pool;
+        renderPoolTabs();
         renderContent();
     }
 
     function render() {
         if (!activeSport) { document.getElementById('mainContent').innerHTML = '<div class="no-sport">Select a sport above</div>'; return; }
         renderCategoryTabs();
+        renderPoolTabs();
         renderStageTabs();
         renderContent();
     }
@@ -316,7 +342,7 @@
     // ── Matches View ───────────────────────────────────────────
     function renderMatchesView() {
         const content = document.getElementById('mainContent');
-        const matches = allMatches.filter(m => m.sport_id === activeSport && m.round === activeStage && (activeCategory === null || m.category === activeCategory));
+        const matches = allMatches.filter(m => m.sport_id === activeSport && m.round === activeStage && (activeCategory === null || m.category === activeCategory) && (activePool === null || m.pool === activePool || (!m.pool && activePool === null)));
         if (!matches.length) { content.innerHTML = `<div class="empty-state">No ${ROUND_LABELS[activeStage]||activeStage} matches yet</div>`; return; }
         content.innerHTML = matches.map(buildMatchCard).join('');
     }
@@ -350,11 +376,12 @@
 
         const click = isLive ? `onclick="window.location.href='livescore.html?match_id=${m.match_id}'"` : '';
 
+        const poolLabel = m.pool ? `<span style="font-size:10px;font-weight:700;background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:8px;">Pool ${m.pool}</span>` : '';
         return `<div class="match-card ${isLive?'live-card':''} ${isFinished?'finished-card':''}" ${click}>
             <div class="match-card-top">
                 <span class="match-num" style="background:${sc.bg};color:${sc.color};padding:2px 8px;border-radius:8px;">${m.match_number||''}</span>
                 <div style="display:flex;gap:5px;align-items:center;">
-                    ${m.category ? `<span style="font-size:11px;font-weight:600;background:#f1f3f4;color:#5f6368;padding:2px 8px;border-radius:8px;">${m.category}</span>` : ''}
+                    ${poolLabel}${m.category ? `<span style="font-size:11px;font-weight:600;background:#f1f3f4;color:#5f6368;padding:2px 8px;border-radius:8px;">${m.category}</span>` : ''}
                     ${badge}
                 </div>
             </div>
@@ -378,7 +405,7 @@
     // ── Tournament Path ────────────────────────────────────────
     function renderPathView() {
         const content = document.getElementById('mainContent');
-        const sm = allMatches.filter(m => m.sport_id === activeSport && (activeCategory === null || m.category === activeCategory));
+        const sm = allMatches.filter(m => m.sport_id === activeSport && (activeCategory === null || m.category === activeCategory) && (activePool === null || m.pool === activePool || m.pool === null));
         const rounds = ROUND_ORDER.filter(r => sm.some(m => m.round === r) || shouldShowRound(r, sm));
         if (!rounds.length) { content.innerHTML = '<div class="empty-state">No matches created yet</div>'; return; }
         content.innerHTML = rounds.map(r => renderPathRound(r, sm)).join('');
