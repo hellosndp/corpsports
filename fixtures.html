@@ -275,7 +275,12 @@
 
     // ── Stage Tabs ─────────────────────────────────────────────
     function renderStageTabs() {
-        const sportMatches = allMatches.filter(m => m.sport_id === activeSport);
+        // Filter by active sport + category + pool
+        const sportMatches = allMatches.filter(m =>
+            m.sport_id === activeSport &&
+            (activeCategory === null || m.category === activeCategory) &&
+            (activePool === null || m.pool === activePool)
+        );
         const rounds = [...new Set(sportMatches.map(m => m.round).filter(Boolean))];
         const ordered = ROUND_ORDER.filter(r => rounds.includes(r));
         if (!ordered.length) { document.getElementById('stageTabs').style.display = 'none'; return; }
@@ -485,9 +490,26 @@
     async function refresh() {
         try {
             await fetchAll();
+
+            // Auto-select first sport with matches if none selected
+            const sportsWithMatches = new Set(allMatches.map(m => m.sport?.sport_name).filter(Boolean));
+            if (!activeSport && sportsWithMatches.size > 0) {
+                const first = ALL_SPORTS.find(s => sportsWithMatches.has(s));
+                if (first) {
+                    const sport = Object.values(sportMap).find(sp => sp.sport_name === first);
+                    if (sport) { activeSport = sport.sport_id; activeSportName = first; }
+                }
+            }
+
             renderSportTabs();
-            render();
-            document.getElementById('lastUpdated').textContent = '↻ ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+            if (activeSport) {
+                document.getElementById('viewToggle').style.display = 'flex';
+                renderCategoryTabs();
+                renderPoolTabs();
+                renderStageTabs();
+                renderContent();
+            }
         } catch(e) { console.error('Refresh error:', e); }
     }
 
