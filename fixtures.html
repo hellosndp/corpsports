@@ -226,7 +226,6 @@
     function renderSportTabs() {
         const container = document.getElementById('sportTabs');
         const sportsWithMatches = new Set(allMatches.map(m => m.sport?.sport_name).filter(Boolean));
-
         container.innerHTML = ALL_SPORTS.map(s => {
             const hasMatches = sportsWithMatches.has(s);
             const sport = Object.values(sportMap).find(sp => sp.sport_name === s);
@@ -234,26 +233,6 @@
             const cls = hasMatches ? (activeSportName === s ? 'sport-tab active' : 'sport-tab') : 'sport-tab disabled';
             return `<div class="${cls}" data-sport-id="${sid}" data-sport-name="${s}" onclick="selectSport('${sid}','${s}')">${s}</div>`;
         }).join('');
-
-        if (!activeSport && sportsWithMatches.size > 0) {
-            const first = ALL_SPORTS.find(s => sportsWithMatches.has(s));
-            if (first) {
-                const sport = Object.values(sportMap).find(sp => sp.sport_name === first);
-                if (sport) {
-                    activeSport     = sport.sport_id;
-                    activeSportName = first;
-                    document.getElementById('viewToggle').style.display = 'flex';
-                }
-            }
-        }
-        // Always render after sport tabs update
-        if (activeSport) {
-            // Highlight active tab
-            document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
-            const tab = document.querySelector(`[data-sport-id="${activeSport}"]`);
-            if (tab) tab.classList.add('active');
-            render();
-        }
     }
 
     function selectSport(sportId, sportName, rerender = true) {
