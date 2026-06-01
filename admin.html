@@ -591,7 +591,7 @@
         <div class="header">
             <button class="hamburger-btn" onclick="toggleMenu()" id="hamburgerBtn">☰</button>
             <span>Scorer</span>
-            <a href="home.html" style="color:white;text-decoration:none;font-size:20px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;" title="Viewer Home">🏠</a>
+            <a href="home.html" target="_blank" style="color:white;text-decoration:none;font-size:20px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;" title="Viewer Home">🏠</a>
         </div>
 
         <!-- Profile dropdown -->
@@ -617,6 +617,10 @@
         <!-- Category filter (shown only when sport selected) -->
         <div id="adminCategoryRow" style="display:none;border-bottom:1px solid #f0f0f0;">
             <div style="display:flex;gap:6px;padding:8px 16px 8px;overflow-x:auto;" id="adminCategoryTabs"></div>
+        </div>
+        <!-- Round/Stage filter -->
+        <div id="adminRoundRow" style="display:none;border-bottom:1px solid #f0f0f0;">
+            <div style="display:flex;gap:6px;padding:8px 16px 8px;overflow-x:auto;" id="adminRoundTabs"></div>
         </div>
 
         <div class="matches-section">
@@ -785,6 +789,7 @@
         let activeTab = 'scheduled';
         let activeAdminSport = null;
         let activeAdminCategory = null;
+        let activeAdminRound = null;
 
         function switchTab(tab) {
             activeTab = tab;
@@ -823,17 +828,49 @@
             }).join('');
         }
 
+        const ADMIN_ROUND_LABELS = { GS1:'Group Stage 1', GS2:'Group Stage 2', QF:'Quarter Finals', QR:'Qualifier Round', ER:'Eliminator Round', SF:'Semi Finals', FINAL:'Final' };
+        const ADMIN_ROUND_ORDER = ['GS1','GS2','QF','QR','ER','SF','FINAL'];
+
+        function renderAdminRoundTabs() {
+            const row = document.getElementById('adminRoundRow');
+            const inner = document.getElementById('adminRoundTabs');
+            const filtered = matchesList.filter(m =>
+                (!activeAdminSport || m.sport?.sport_name === activeAdminSport) &&
+                (!activeAdminCategory || m.category === activeAdminCategory)
+            );
+            const rounds = [...new Set(filtered.map(m => m.round).filter(Boolean))];
+            const ordered = ADMIN_ROUND_ORDER.filter(r => rounds.includes(r));
+            if (!ordered.length) { row.style.display = 'none'; return; }
+            row.style.display = 'block';
+            inner.innerHTML = [null, ...ordered].map(r => {
+                const label = r === null ? 'All' : (ADMIN_ROUND_LABELS[r] || r);
+                const isActive = activeAdminRound === r;
+                const style = isActive ? 'background:#1a73e8;color:white;border-color:#1a73e8;' : 'background:white;color:#5f6368;border:1.5px solid #e0e0e0;';
+                return `<div onclick="selectAdminRound(${r===null?'null':`'${r}'`})" style="padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;flex-shrink:0;transition:all 0.2s;${style}">${label}</div>`;
+            }).join('');
+        }
+
+        function selectAdminRound(round) {
+            activeAdminRound = round;
+            renderAdminRoundTabs();
+            renderMatches();
+        }
+
         function selectAdminSport(sport) {
             activeAdminSport = sport;
             activeAdminCategory = null;
+            activeAdminRound = null;
             renderAdminSportTabs();
             renderAdminCategoryTabs();
+            renderAdminRoundTabs();
             renderMatches();
         }
 
         function selectAdminCategory(cat) {
             activeAdminCategory = cat;
+            activeAdminRound = null;
             renderAdminCategoryTabs();
+            renderAdminRoundTabs();
             renderMatches();
         }
 
@@ -860,6 +897,7 @@
                 }));
                 renderAdminSportTabs();
                 renderAdminCategoryTabs();
+                renderAdminRoundTabs();
                 renderMatches();
             } catch (e) {
                 console.error('Failed to load matches:', e);
@@ -893,7 +931,8 @@
                     : (m.status !== 'completed' && m.status !== 'walkover');
                 const sportMatch = !activeAdminSport || m.sport?.sport_name === activeAdminSport;
                 const catMatch   = !activeAdminCategory || m.category === activeAdminCategory;
-                return tabMatch && sportMatch && catMatch;
+                const roundMatch  = !activeAdminRound || m.round === activeAdminRound;
+                return tabMatch && sportMatch && catMatch && roundMatch;
             });
 
             if (!filtered.length) {
@@ -952,8 +991,6 @@
                             <div class="match-team"><span class="match-team-name">${team2}</span></div>
                         </div>
                         <div class="match-meta">
-                            <span class="match-meta-item">Sets to win: ${m.sets_to_win}</span>
-                            <span class="match-meta-item">Points/set: ${m.points_per_set}</span>
                             <span class="status-badge ${statusClass}">${m.status}</span>
                         </div>
                         ${winnerName ? `<div class="winner-tag">🏆 ${winnerName}</div>` : ''}

@@ -81,7 +81,7 @@
 <div class="container">
     <div class="header">
         <span>Fixtures</span>
-        <a href="login.html" style="text-decoration:none;font-size:20px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;" title="Scorer Login">🔐</a>
+        <a href="login.html" target="_blank" style="text-decoration:none;font-size:20px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;" title="Scorer Login">📝</a>
     </div>
     <div class="sport-tabs" id="sportTabs">
         <div class="skeleton" style="width:80px;height:34px;border-radius:20px;flex-shrink:0;"></div>
@@ -239,10 +239,20 @@
             const first = ALL_SPORTS.find(s => sportsWithMatches.has(s));
             if (first) {
                 const sport = Object.values(sportMap).find(sp => sp.sport_name === first);
-                if (sport) selectSport(sport.sport_id, first, true); // true = render immediately
+                if (sport) {
+                    activeSport     = sport.sport_id;
+                    activeSportName = first;
+                    document.getElementById('viewToggle').style.display = 'flex';
+                }
             }
-        } else if (activeSport) {
-            render(); // re-render on poll refresh
+        }
+        // Always render after sport tabs update
+        if (activeSport) {
+            // Highlight active tab
+            document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
+            const tab = document.querySelector(`[data-sport-id="${activeSport}"]`);
+            if (tab) tab.classList.add('active');
+            render();
         }
     }
 
@@ -342,7 +352,7 @@
     // ── Matches View ───────────────────────────────────────────
     function renderMatchesView() {
         const content = document.getElementById('mainContent');
-        const matches = allMatches.filter(m => m.sport_id === activeSport && m.round === activeStage && (activeCategory === null || m.category === activeCategory) && (activePool === null || m.pool === activePool || (!m.pool && activePool === null)));
+        const matches = allMatches.filter(m => m.sport_id === activeSport && m.round === activeStage && (activeCategory === null || m.category === activeCategory) && (activePool === null || m.pool === activePool));
         if (!matches.length) { content.innerHTML = `<div class="empty-state">No ${ROUND_LABELS[activeStage]||activeStage} matches yet</div>`; return; }
         content.innerHTML = matches.map(buildMatchCard).join('');
     }
@@ -358,13 +368,13 @@
         const isTBD1 = !m.team1?.team_name, isTBD2 = !m.team2?.team_name;
 
         const sc = SPORT_COLORS[activeSportName] || { bg:'#e8f0fe', color:'#1a73e8' };
-        const time = m.scheduled_time ? new Date(m.scheduled_time).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '';
+        const time = ''; // timestamp removed
 
         let badge = '';
         if (isLive)     badge = `<span class="status-badge status-live"><span class="live-pulse"></span>LIVE</span>`;
         else if (isDone) badge = `<span class="status-badge status-completed">✓ Done</span>`;
         else if (isWalkover) badge = `<span class="status-badge status-completed">Walkover</span>`;
-        else             badge = `<span class="status-badge status-scheduled">${time||'Scheduled'}</span>`;
+        else             badge = `<span class="status-badge status-scheduled">Scheduled</span>`;
 
         let s1='', s2='';
         if (isLive && m._scoreA !== undefined) { s1=`<span class="match-team-score score-a">${m._scoreA}</span>`; s2=`<span class="match-team-score score-b">${m._scoreB}</span>`; }
