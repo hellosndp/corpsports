@@ -447,6 +447,7 @@
         }
     </script>
     <script src="progression.js"></script>
+    <script src="players.js"></script>
 </head>
 <body>
 <div class="app">
@@ -631,6 +632,9 @@
             ]);
             teamA = { id: match.team1_id, name: _t1?.[0]?.team_name || '?' };
             teamB = { id: match.team2_id, name: _t2?.[0]?.team_name || '?' };
+
+            // Init player selection sheet
+            initPlayerSheet(matchId, teamA, teamB, currentScorer?.id || null);
 
             document.getElementById('teamAName').textContent = teamA.name;
             document.getElementById('teamBName').textContent = teamB.name;

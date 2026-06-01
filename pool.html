@@ -423,6 +423,7 @@
         }
     </script>
     <script src="progression.js"></script>
+    <script src="players.js"></script>
 </head>
 <body>
 <div class="app">
@@ -541,6 +542,9 @@
             ]);
             teamA = { id: match.team1_id, name: _t1?.[0]?.team_name || '?' };
             teamB = { id: match.team2_id, name: _t2?.[0]?.team_name || '?' };
+
+            // Init player selection sheet
+            initPlayerSheet(matchId, teamA, teamB, currentScorer?.id || null);
 
             // Total sets = sets_to_win * 2 - 1 (e.g. best of 3 = 2 sets to win)
             totalSets = match.sets_to_win ? (match.sets_to_win * 2 - 1) : 3;
